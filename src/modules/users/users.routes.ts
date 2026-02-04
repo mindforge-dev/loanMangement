@@ -7,6 +7,7 @@ import { UserRole } from './user.entity';
 const router = Router();
 
 // Protected: All logged in users
+// Protected: All logged in users
 router.get('/me', authenticate, userController.getMe);
 
 // Protected: Admin only

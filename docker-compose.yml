@@ -14,7 +14,8 @@ services:
       - JWT_SECRET=super_secret_jwt_key_change_me
       - JWT_EXPIRES_IN=1d
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -35,6 +36,11 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:

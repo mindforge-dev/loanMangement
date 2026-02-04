@@ -1,0 +1,9 @@
+process.env.NODE_ENV = 'test';
+process.env.PORT = '3000';
+process.env.DB_HOST = 'localhost';
+process.env.DB_PORT = '3306';
+process.env.DB_USER = 'root';
+process.env.DB_PASS = 'password';
+process.env.DB_NAME = 'loan_management_test';
+process.env.JWT_SECRET = 'test_secret';
+process.env.JWT_EXPIRES_IN = '1h';

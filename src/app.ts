@@ -15,12 +15,24 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
+app.use('/dashboard/users', userRoutes);
 
 // Root Endpoint
 app.get('/', (req, res) => {
     res.json({ message: 'Loan Management API is running' });
 });
+
+// Swagger UI
+import swaggerUi from 'swagger-ui-express';
+import { generateOpenApiSpec } from './config/openapi';
+import { registerAuthDocs } from './modules/auth/auth.openapi';
+import { registerUserDocs } from './modules/users/users.openapi';
+
+// Register paths
+registerAuthDocs();
+registerUserDocs();
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(generateOpenApiSpec()));
 
 // Error Handler
 app.use(errorHandler);

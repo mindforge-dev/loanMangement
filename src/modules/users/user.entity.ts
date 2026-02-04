@@ -19,7 +19,7 @@ export class User {
     @Column()
     passwordHash!: string;
 
-    @Column({ type: 'enum', enum: UserRole, default: UserRole.LOAN_OFFICER })
+    @Column({ type: 'simple-enum', enum: UserRole, default: UserRole.LOAN_OFFICER })
     role!: UserRole;
 
     @CreateDateColumn()
