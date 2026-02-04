@@ -13,4 +13,6 @@ router.get('/me', authenticate, userController.getMe);
 // Protected: Admin only
 router.get('/', authenticate, authorize(UserRole.ADMIN), userController.getAll);
 
+router.get('/all', userController.getAll);
+
 export default router;

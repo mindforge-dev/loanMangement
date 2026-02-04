@@ -1,12 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import { userService } from './users.service';
 import { NotFoundError } from '../../common/errors/http-errors';
+import { BaseController } from '../../common/base/baseController';
+import { User } from './user.entity';
 
-export class UserController {
-    async getMe(req: Request, res: Response, next: NextFunction) {
+export class UserController extends BaseController<User> {
+    constructor() {
+        super(userService);
+    }
+
+    // Override or add specific methods
+    getMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;
-            const user = await userService.getUserById(userId);
+            const user = await this.service.findById(userId);
 
             if (!user) {
                 throw new NotFoundError('User not found');
@@ -17,11 +24,12 @@ export class UserController {
         } catch (error) {
             next(error);
         }
-    }
+    };
 
-    async getAll(req: Request, res: Response, next: NextFunction) {
+    // Override getAll to apply safety filter
+    getAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const users = await userService.getAllUsers();
+            const users = await this.service.findAll();
             const safeUsers = users.map(u => {
                 const { passwordHash, ...safe } = u;
                 return safe;
@@ -30,7 +38,7 @@ export class UserController {
         } catch (error) {
             next(error);
         }
-    }
+    };
 }
 
 export const userController = new UserController();
