@@ -1,6 +1,7 @@
 import { AppDataSource } from "../config/datasource";
 import { User, UserRole } from "../modules/users/user.entity";
 import { Borrower } from "../modules/borrowers/borrower.entity";
+import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
 import bcrypt from "bcrypt";
 
 async function seed() {
@@ -11,6 +12,7 @@ async function seed() {
 
     const userRepository = AppDataSource.getRepository(User);
     const borrowerRepository = AppDataSource.getRepository(Borrower);
+    const interestRateRepository = AppDataSource.getRepository(InterestRate);
 
     // Seed Users
     console.log("Seeding users...");
@@ -83,6 +85,28 @@ async function seed() {
         console.log(`Borrower ${borrower.full_name} created.`);
       } else {
         console.log(`Borrower ${borrower.full_name} already exists.`);
+      }
+    }
+
+    // Seed Interest Rates
+    console.log("Seeding interest rates...");
+    const interestRatesData = [
+      { rate_percent: 5, is_active: true },
+      { rate_percent: 10, is_active: true },
+      { rate_percent: 12, is_active: true },
+      { rate_percent: 15, is_active: true },
+      { rate_percent: 20, is_active: false },
+    ];
+
+    for (const rate of interestRatesData) {
+      const existingRate = await interestRateRepository.findOneBy({
+        rate_percent: rate.rate_percent,
+      });
+      if (!existingRate) {
+        await interestRateRepository.save(rate);
+        console.log(`Interest rate ${rate.rate_percent}% created.`);
+      } else {
+        console.log(`Interest rate ${rate.rate_percent}% already exists.`);
       }
     }
 
