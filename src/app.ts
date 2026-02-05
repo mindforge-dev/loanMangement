@@ -5,6 +5,7 @@ import { errorHandler } from "./common/middleware/error-handler";
 import authRoutes from "./modules/auth/auth.routes";
 import userRoutes from "./modules/users/users.routes";
 import borrowerRoutes from "./modules/borrowers/borrowers.routes";
+import interestRateRoutes from "./modules/interest-rates/interest-rates.routes";
 
 export const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRoutes);
 app.use("/dashboard/users", userRoutes);
 app.use("/dashboard/borrowers", borrowerRoutes);
+app.use("/dashboard/interest-rates", interestRateRoutes);
 
 // Root Endpoint
 app.get("/", (req, res) => {
@@ -30,11 +32,13 @@ import { generateOpenApiSpec } from "./config/openapi";
 import { registerAuthDocs } from "./modules/auth/auth.openapi";
 import { registerUserDocs } from "./modules/users/users.openapi";
 import { registerBorrowerDocs } from "./modules/borrowers/borrowers.openapi";
+import { registerInterestRateDocs } from "./modules/interest-rates/interest-rates.openapi";
 
 // Register paths
 registerAuthDocs();
 registerUserDocs();
 registerBorrowerDocs();
+registerInterestRateDocs();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(generateOpenApiSpec()));
 
