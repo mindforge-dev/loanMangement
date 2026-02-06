@@ -7,4 +7,12 @@ export class TransactionRepository extends BaseRepository<Transaction> {
         super(AppDataSource.getRepository(Transaction));
     }
 
+    async findByLoanId(loanId: string): Promise<Transaction[]> {
+        return this.repo.find({
+            where: { loan_id: loanId } as any,
+            order: { payment_date: "DESC" },
+        });
+    }
 }
+
+export const transactionRepository = new TransactionRepository();

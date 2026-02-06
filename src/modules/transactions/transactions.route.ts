@@ -9,6 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get("/", transactionController.findAll);
+router.get("/loan/:loanId", transactionController.getByLoan);
 router.get("/:id", transactionController.findById);
 router.post("/", validate(CreateTransactionSchema), transactionController.create);
 router.put("/:id", validate(UpdateTransactionSchema), transactionController.update);

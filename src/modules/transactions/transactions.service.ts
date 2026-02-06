@@ -1,11 +1,12 @@
 import { ICrudService } from "../../common/base/interfaces/service";
 import { Transaction } from "./transactions.entity";
-import { TransactionRepository } from "./transactions.repository";
+import { transactionRepository, TransactionRepository } from "./transactions.repository";
+
 export class TransactionService implements ICrudService<Transaction> {
     private transactionRepo: TransactionRepository;
 
     constructor() {
-        this.transactionRepo = new TransactionRepository();
+        this.transactionRepo = transactionRepository;
     }
 
     async create(data: Partial<Transaction>): Promise<Transaction> {
@@ -28,4 +29,9 @@ export class TransactionService implements ICrudService<Transaction> {
         return this.transactionRepo.delete(id);
     }
 
+    async findByLoan(loanId: string): Promise<Transaction[]> {
+        return this.transactionRepo.findByLoanId(loanId);
+    }
 }
+
+export const transactionService = new TransactionService();
