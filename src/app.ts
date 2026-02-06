@@ -8,6 +8,7 @@ import borrowerRoutes from "./modules/borrowers/borrowers.routes";
 import interestRateRoutes from "./modules/interest-rates/interest-rates.routes";
 import loanRoutes from "./modules/loans/loans.routes";
 import transactionRoutes from "./modules/transactions/transactions.route";
+import contractRoutes from "./modules/contracts/contracts.routes";
 
 export const app = express();
 
@@ -24,6 +25,7 @@ app.use("/dashboard/borrowers", borrowerRoutes);
 app.use("/dashboard/interest-rates", interestRateRoutes);
 app.use("/dashboard/loans", loanRoutes);
 app.use("/dashboard/transactions", transactionRoutes);
+app.use("/dashboard/contracts", contractRoutes);
 
 // Root Endpoint
 app.get("/", (req, res) => {
@@ -39,6 +41,7 @@ import { registerBorrowerDocs } from "./modules/borrowers/borrowers.openapi";
 import { registerInterestRateDocs } from "./modules/interest-rates/interest-rates.openapi";
 import { registerLoanDocs } from "./modules/loans/loans.openapi";
 import { registerTransactionDocs } from "./modules/transactions/transactions.openapi";
+import { registerContractDocs } from "./modules/contracts/contracts.openapi";
 
 // Register paths
 registerAuthDocs();
@@ -47,6 +50,7 @@ registerBorrowerDocs();
 registerInterestRateDocs();
 registerLoanDocs();
 registerTransactionDocs();
+registerContractDocs();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(generateOpenApiSpec()));
 
