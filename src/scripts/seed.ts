@@ -2,6 +2,8 @@ import { AppDataSource } from "../config/datasource";
 import { User, UserRole } from "../modules/users/user.entity";
 import { Borrower } from "../modules/borrowers/borrower.entity";
 import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
+import { Loan, LoanStatus, LoanType } from "../modules/loans/loan.entity";
+import { Transaction } from "../modules/transactions/transactions.entity";
 import bcrypt from "bcrypt";
 
 async function seed() {
@@ -108,6 +110,74 @@ async function seed() {
       } else {
         console.log(`Interest rate ${rate.rate_percent}% already exists.`);
       }
+    }
+
+    // Seed Loans
+    console.log("Seeding loans...");
+    const loanRepository = AppDataSource.getRepository(Loan);
+    const transactionRepository = AppDataSource.getRepository(Transaction);
+
+    const borrowers = await borrowerRepository.find();
+    const interestRate = await interestRateRepository.findOneBy({ rate_percent: 10 });
+
+    if (borrowers.length > 0 && interestRate) {
+      const borrower = borrowers[0];
+
+      const existingLoan = await loanRepository.findOneBy({ borrower_id: borrower.id });
+
+      let loan: Loan;
+
+      if (!existingLoan) {
+        loan = await loanRepository.save({
+          borrower_id: borrower.id,
+          interest_rate_id: interestRate.id,
+          principal_amount: 5000000,
+          loan_type: LoanType.PERSONAL,
+          start_date: new Date("2024-01-01"),
+          end_date: new Date("2025-01-01"),
+          term_months: 12,
+          interest_rate_snapshot: interestRate.rate_percent,
+          current_balance: 4500000,
+          status: LoanStatus.ACTIVE
+        });
+        console.log(`Loan for ${borrower.full_name} created.`);
+      } else {
+        loan = existingLoan;
+        console.log(`Loan for ${borrower.full_name} already exists.`);
+      }
+
+      // Seed Transactions
+      console.log("Seeding transactions...");
+      const existingTransactions = await transactionRepository.findBy({ loan_id: loan.id });
+
+      if (existingTransactions.length === 0) {
+        await transactionRepository.save([
+          {
+            loan_id: loan.id,
+            payment_date: new Date("2024-02-01"),
+            amount_paid: 250000,
+            remaining_balance: 4750000,
+            payment_term_months: 1,
+            method: "Bank Transfer",
+            note: "First Installment"
+          },
+          {
+            loan_id: loan.id,
+            payment_date: new Date("2024-03-01"),
+            amount_paid: 250000,
+            remaining_balance: 4500000,
+            payment_term_months: 2,
+            method: "Cash",
+            note: "Second Installment"
+          }
+        ]);
+        console.log(`Transactions for loan ${loan.id} created.`);
+      } else {
+        console.log(`Transactions for loan ${loan.id} already exist.`);
+      }
+
+    } else {
+      console.log("Skipping loan seeding: No borrowers or interest rates found.");
     }
 
     console.log("Seeding completed successfully.");
