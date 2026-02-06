@@ -3,7 +3,7 @@ import { User, UserRole } from "../modules/users/user.entity";
 import { Borrower } from "../modules/borrowers/borrower.entity";
 import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
 import { Loan, LoanStatus, LoanType } from "../modules/loans/loan.entity";
-import { Transaction } from "../modules/transactions/transactions.entity";
+import { Transaction, TransactionType } from "../modules/transactions/transactions.entity";
 import bcrypt from "bcrypt";
 
 async function seed() {
@@ -154,19 +154,23 @@ async function seed() {
         await transactionRepository.save([
           {
             loan_id: loan.id,
+            borrower_id: borrower.id,
             payment_date: new Date("2024-02-01"),
             amount_paid: 250000,
             remaining_balance: 4750000,
             payment_term_months: 1,
+            type: TransactionType.REPAYMENT,
             method: "Bank Transfer",
             note: "First Installment"
           },
           {
             loan_id: loan.id,
+            borrower_id: borrower.id,
             payment_date: new Date("2024-03-01"),
             amount_paid: 250000,
             remaining_balance: 4500000,
             payment_term_months: 2,
+            type: TransactionType.REPAYMENT,
             method: "Cash",
             note: "Second Installment"
           }
