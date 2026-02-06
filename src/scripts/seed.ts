@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 async function seed() {
   try {
     console.log("Initializing data source...");
+    AppDataSource.setOptions({ synchronize: false, dropSchema: false, logging: ["error"] });
     await AppDataSource.initialize();
     console.log("Data source initialized.");
 
