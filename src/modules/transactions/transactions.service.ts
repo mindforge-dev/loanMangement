@@ -1,6 +1,8 @@
 import { ICrudService } from "../../common/base/interfaces/service";
 import { Transaction } from "./transactions.entity";
 import { transactionRepository, TransactionRepository } from "./transactions.repository";
+import { AppDataSource } from "../../config/datasource";
+import { Loan, LoanStatus } from "../loans/loan.entity";
 
 export class TransactionService implements ICrudService<Transaction> {
     private transactionRepo: TransactionRepository;
@@ -10,7 +12,40 @@ export class TransactionService implements ICrudService<Transaction> {
     }
 
     async create(data: Partial<Transaction>): Promise<Transaction> {
-        return this.transactionRepo.create(data);
+        return AppDataSource.transaction(async (transactionalEntityManager) => {
+            if (!data.loan_id) {
+                throw new Error("Loan ID is required");
+            }
+
+            const loan = await transactionalEntityManager.findOne(Loan, {
+                where: { id: data.loan_id }
+            });
+
+            if (!loan) {
+                throw new Error("Loan not found");
+            }
+
+            const amountPaid = Number(data.amount_paid) || 0;
+            const currentBalance = Number(loan.current_balance);
+            let newBalance = currentBalance - amountPaid;
+
+            if (newBalance < 0) newBalance = 0;
+
+            loan.current_balance = newBalance;
+
+            if (newBalance === 0) {
+                loan.status = LoanStatus.COMPLETED;
+            }
+
+            await transactionalEntityManager.save(Loan, loan);
+
+            const transaction = transactionalEntityManager.create(Transaction, {
+                ...data,
+                remaining_balance: newBalance
+            });
+
+            return transactionalEntityManager.save(Transaction, transaction);
+        });
     }
 
     async findAll(): Promise<Transaction[]> {
