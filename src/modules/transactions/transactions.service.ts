@@ -1,5 +1,5 @@
 import { ICrudService } from "../../common/base/interfaces/service";
-import { Transaction } from "./transactions.entity";
+import { Transaction, TransactionType } from "./transactions.entity";
 import { transactionRepository, TransactionRepository } from "./transactions.repository";
 import { AppDataSource } from "../../config/datasource";
 import { Loan, LoanStatus } from "../loans/loan.entity";
@@ -27,13 +27,18 @@ export class TransactionService implements ICrudService<Transaction> {
 
             const amountPaid = Number(data.amount_paid) || 0;
             const currentBalance = Number(loan.current_balance);
-            let newBalance = currentBalance - amountPaid;
+            let newBalance = currentBalance;
 
-            if (newBalance < 0) newBalance = 0;
+            if (data.type === TransactionType.REPAYMENT || data.type === TransactionType.OTHER || !data.type) {
+                newBalance = currentBalance - amountPaid;
+                if (newBalance < 0) newBalance = 0;
+            } else if (data.type === TransactionType.LATE_FEE || data.type === TransactionType.PENALTY) {
+                newBalance = currentBalance + amountPaid;
+            }
 
             loan.current_balance = newBalance;
 
-            if (newBalance === 0) {
+            if (newBalance === 0 && (data.type === TransactionType.REPAYMENT || !data.type)) {
                 loan.status = LoanStatus.COMPLETED;
             }
 
@@ -41,6 +46,7 @@ export class TransactionService implements ICrudService<Transaction> {
 
             const transaction = transactionalEntityManager.create(Transaction, {
                 ...data,
+                borrower_id: loan.borrower_id,
                 remaining_balance: newBalance
             });
 

@@ -5,7 +5,9 @@ import { CreateTransactionSchema, UpdateTransactionSchema } from './transactions
 const TransactionResponseSchema = z.object({
     id: z.string().uuid(),
     loan_id: z.string().uuid(),
+    borrower_id: z.string().uuid().nullable().optional(),
     payment_date: z.string(),
+    type: z.string(),
     amount_paid: z.number(),
     remaining_balance: z.number(),
     payment_term_months: z.number(),

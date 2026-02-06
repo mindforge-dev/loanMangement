@@ -17,7 +17,7 @@ export const CreateLoanSchema = z.object({
       start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").openapi({ example: "2024-01-01" }),
       end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").openapi({ example: "2025-01-01" }),
       term_months: z.number().int().positive().openapi({ example: 12 }),
-      interest_rate_snapshot: z.number().openapi({ example: 12.5 }),
+      interest_rate_snapshot: z.number().optional().openapi({ example: 12.5 }),
     })
     .openapi("CreateLoanRequest"),
 });

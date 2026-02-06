@@ -7,6 +7,14 @@ import {
     JoinColumn,
 } from "typeorm";
 import { Loan } from "../loans/loan.entity";
+import { Borrower } from "../borrowers/borrower.entity";
+
+export enum TransactionType {
+    REPAYMENT = "REPAYMENT",
+    LATE_FEE = "LATE_FEE",
+    PENALTY = "PENALTY",
+    OTHER = "OTHER"
+}
 
 @Entity("transactions")
 export class Transaction {
@@ -20,8 +28,22 @@ export class Transaction {
     @JoinColumn({ name: "loan_id" })
     loan!: Loan;
 
+    @Column({ nullable: true })
+    borrower_id!: string;
+
+    @ManyToOne(() => Borrower)
+    @JoinColumn({ name: "borrower_id" })
+    borrower!: Borrower;
+
     @Column("date")
     payment_date!: Date;
+
+    @Column({
+        type: "enum",
+        enum: TransactionType,
+        default: TransactionType.REPAYMENT
+    })
+    type!: TransactionType;
 
     @Column("decimal", { precision: 15, scale: 2 })
     amount_paid!: number;
