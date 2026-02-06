@@ -26,7 +26,7 @@ export const registerContractDocs = () => {
                         schema: z.object({
                             loan_id: z.string().uuid(),
                             signing_date: z.string(),
-                            file: z.instanceof(File).openapi({ type: "string", format: "binary" }),
+                            file: z.any().openapi({ type: "string", format: "binary" }),
                         }),
                     },
                 },
