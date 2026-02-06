@@ -1,5 +1,4 @@
 import {
-  InterestRateService,
   interestRateService,
 } from "./interest-rates.service";
 import { BaseController } from "../../common/base/baseController";

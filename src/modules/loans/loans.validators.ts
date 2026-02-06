@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
-import { LoanStatus } from "./loan.entity";
+import { LoanStatus, LoanType } from "./loan.entity";
 
 extendZodWithOpenApi(z);
 
@@ -13,7 +13,7 @@ export const CreateLoanSchema = z.object({
         .uuid()
         .openapi({ example: "interest-rate-uuid" }),
       principal_amount: z.number().positive().openapi({ example: 10000.0 }),
-      loan_type: z.string().min(2).openapi({ example: "Personal" }),
+      loan_type: z.nativeEnum(LoanType).openapi({ example: LoanType.PERSONAL }),
       start_date: z.string().openapi({ example: "2024-01-01" }),
       end_date: z.string().openapi({ example: "2025-01-01" }),
       term_months: z.number().int().positive().openapi({ example: 12 }),

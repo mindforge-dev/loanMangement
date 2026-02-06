@@ -9,7 +9,6 @@ export class UserController extends BaseController<User> {
         super(userService);
     }
 
-    // Override or add specific methods
     getMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.user!.userId;

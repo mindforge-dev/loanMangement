@@ -18,6 +18,15 @@ export enum LoanStatus {
   REJECTED = "REJECTED",
 }
 
+export enum LoanType {
+  PERSONAL = "PERSONAL",
+  HOME = "HOME",
+  AUTO = "AUTO",
+  BUSINESS = "BUSINESS",
+  EDUCATION = "EDUCATION",
+  OTHER = "OTHER",
+}
+
 @Entity("loans")
 export class Loan {
   @PrimaryGeneratedColumn("uuid", { name: "loan_id" })
@@ -40,8 +49,8 @@ export class Loan {
   @Column("decimal", { precision: 15, scale: 2 })
   principal_amount!: number;
 
-  @Column()
-  loan_type!: string;
+  @Column({ type: "varchar", length: 50 })
+  loan_type!: LoanType;
 
   @Column("date")
   start_date!: Date;

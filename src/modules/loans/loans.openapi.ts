@@ -1,18 +1,20 @@
 import { registry } from "../../config/openapi";
 import { z } from "zod";
 
+import { LoanStatus, LoanType } from "./loan.entity";
+
 const LoanResponseSchema = z.object({
   id: z.string().uuid(),
   borrower_id: z.string().uuid(),
   interest_rate_id: z.string().uuid(),
   principal_amount: z.number(),
-  loan_type: z.string(),
+  loan_type: z.nativeEnum(LoanType),
   start_date: z.string(),
   end_date: z.string(),
   term_months: z.number(),
   interest_rate_snapshot: z.number(),
   current_balance: z.number(),
-  status: z.string(),
+  status: z.nativeEnum(LoanStatus),
   created_at: z.string(),
   updated_at: z.string(),
 });
