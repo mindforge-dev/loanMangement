@@ -31,7 +31,7 @@ export const generateOpenApiSpec = () => {
     },
     servers: [
       {
-        url: "/",
+        url: "/api/",
         description: "Current Server",
       },
     ],
