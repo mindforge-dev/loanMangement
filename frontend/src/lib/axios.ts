@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '../stores/authStore'
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -12,7 +13,7 @@ export const api = axios.create({
 // Request interceptor - add auth token if available
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token')
+        const token = useAuthStore.getState().token
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
         }
@@ -29,7 +30,7 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             // Handle unauthorized - clear token and redirect to login
-            localStorage.removeItem('token')
+            useAuthStore.getState().logout()
             window.location.href = '/login'
         }
         return Promise.reject(error)

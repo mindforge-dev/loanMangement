@@ -1,15 +1,17 @@
 import { useMutation } from '@tanstack/react-query'
 import type { UseMutationResult } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
-import { login, register, logout, getCurrentUser, isAuthenticated } from '../services/authService'
+import { login, register, logout as logoutApi } from '../services/authService'
 import type { LoginCredentials, AuthResponse, RegisterData } from '../services/authService'
+import { useAuthStore } from '../stores/authStore'
 
 // Login mutation
 export const useLogin = (): UseMutationResult<AuthResponse, Error, LoginCredentials> => {
+    const loginStore = useAuthStore((state) => state.login)
+
     return useMutation({
         mutationFn: login,
-        onSuccess: () => {
-            // Use window.location for hard redirect to ensure auth state is fresh
+        onSuccess: (data) => {
+            loginStore(data.user, data.token)
             window.location.href = '/'
         },
     })
@@ -17,10 +19,12 @@ export const useLogin = (): UseMutationResult<AuthResponse, Error, LoginCredenti
 
 // Register mutation
 export const useRegister = (): UseMutationResult<AuthResponse, Error, RegisterData> => {
+    const loginStore = useAuthStore((state) => state.login)
+
     return useMutation({
         mutationFn: register,
-        onSuccess: () => {
-            // Use window.location for hard redirect to ensure auth state is fresh
+        onSuccess: (data) => {
+            loginStore(data.user, data.token)
             window.location.href = '/'
         },
     })
@@ -28,39 +32,27 @@ export const useRegister = (): UseMutationResult<AuthResponse, Error, RegisterDa
 
 // Logout mutation
 export const useLogout = () => {
+    const logoutStore = useAuthStore((state) => state.logout)
+
     return useMutation({
         mutationFn: async () => {
-            logout()
+            await logoutApi()
         },
         onSuccess: () => {
+            logoutStore()
             window.location.href = '/login'
         },
     })
 }
 
-// Get current authenticated user
-export const useCurrentUser = () => {
-    const [user, setUser] = useState(() => getCurrentUser())
-    const [authenticated, setAuthenticated] = useState(() => isAuthenticated())
-
-    useEffect(() => {
-        // Update user state when component mounts or storage changes
-        const handleStorageChange = () => {
-            setUser(getCurrentUser())
-            setAuthenticated(isAuthenticated())
-        }
-
-        // Listen for storage changes (e.g., login/logout in another tab)
-        window.addEventListener('storage', handleStorageChange)
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange)
-        }
-    }, [])
+// Get current auth state
+export const useAuth = () => {
+    const { user, isAuthenticated, logout } = useAuthStore()
 
     return {
         user,
-        isAuthenticated: authenticated,
-        isLoading: false, // Could be true if fetching from API
+        isAuthenticated,
+        logout,
+        isLoading: false,
     }
 }
