@@ -15,7 +15,11 @@ export const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ["http://localhost:3000", "https://www.zcoder.space"],
+  origin: [
+    "http://localhost:3000",
+    "https://www.zcoder.space",
+    "https://zcoder.space"
+  ],
   credentials: true
 }));
 app.use(express.json());
