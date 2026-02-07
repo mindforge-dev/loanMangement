@@ -1,79 +1,149 @@
+import { useMemo, useState } from 'react'
+import {
+    useReactTable,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    getFilteredRowModel,
+    createColumnHelper,
+} from '@tanstack/react-table'
+import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
+import { DataTable, Pagination, TableToolbar } from '../../components/table'
 
+type User = {
+    id: number
+    name: string
+    email: string
+    role: string
+    status: 'Active' | 'Inactive'
+}
+
+const columnHelper = createColumnHelper<User>()
 
 function Users() {
-    const users = [
+    const [data, setData] = useState<User[]>([
         { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
         { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
         { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Inactive' },
-    ]
+        { id: 4, name: 'Alice Williams', email: 'alice@example.com', role: 'Manager', status: 'Active' },
+        { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', role: 'User', status: 'Active' },
+        { id: 6, name: 'Diana Prince', email: 'diana@example.com', role: 'Admin', status: 'Active' },
+        { id: 7, name: 'Ethan Hunt', email: 'ethan@example.com', role: 'User', status: 'Inactive' },
+        { id: 8, name: 'Fiona Gallagher', email: 'fiona@example.com', role: 'Manager', status: 'Active' },
+    ])
+
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = useState('')
+
+    const columns = useMemo(
+        () => [
+            columnHelper.accessor('name', {
+                header: 'Name',
+                cell: (info) => (
+                    <div className="text-sm font-medium text-gray-900">{info.getValue()}</div>
+                ),
+            }),
+            columnHelper.accessor('email', {
+                header: 'Email',
+                cell: (info) => (
+                    <div className="text-sm text-gray-600">{info.getValue()}</div>
+                ),
+            }),
+            columnHelper.accessor('role', {
+                header: 'Role',
+                cell: (info) => (
+                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {info.getValue()}
+                    </span>
+                ),
+            }),
+            columnHelper.accessor('status', {
+                header: 'Status',
+                cell: (info) => (
+                    <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${info.getValue() === 'Active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                            }`}
+                    >
+                        {info.getValue()}
+                    </span>
+                ),
+            }),
+            columnHelper.display({
+                id: 'actions',
+                header: 'Actions',
+                cell: (info) => (
+                    <div className="text-sm font-medium space-x-2">
+                        <button
+                            onClick={() => handleEdit(info.row.original)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleDelete(info.row.original.id)}
+                            className="text-red-600 hover:text-red-900"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                ),
+            }),
+        ],
+        []
+    )
+
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const table = useReactTable({
+        data,
+        columns,
+        state: {
+            sorting,
+            columnFilters,
+            globalFilter,
+        },
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+    })
+
+    const handleEdit = (user: User) => {
+        console.log('Edit user:', user)
+        // TODO: Implement edit functionality
+    }
+
+    const handleDelete = (id: number) => {
+        if (confirm('Are you sure you want to delete this user?')) {
+            setData((prev) => prev.filter((user) => user.id !== id))
+        }
+    }
+
+    const handleAddUser = () => {
+        console.log('Add new user')
+        // TODO: Implement add user functionality
+    }
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Users</h2>
-                    <p className="text-gray-600 mt-1">Manage your system users</p>
-                </div>
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg">
-                    + Add User
-                </button>
-            </div>
+            <TableToolbar
+                table={table}
+                globalFilter={globalFilter}
+                setGlobalFilter={setGlobalFilter}
+                title="Users"
+                description="Manage your system users"
+                addButtonText="+ Add User"
+                onAddClick={handleAddUser}
+            />
 
-            {/* Users table */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Role
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-600">{user.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'Active'
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {user.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <button className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                        <button className="text-red-600 hover:text-red-900">Delete</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            <div>
+                <DataTable table={table} />
+                <Pagination table={table} />
             </div>
         </div>
     )
