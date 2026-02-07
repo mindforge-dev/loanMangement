@@ -12,7 +12,7 @@ import {
     BellIcon,
     UserCircleIcon
 } from '@heroicons/react/24/outline'
-
+import { useCurrentUser } from '../hooks/useAuth'
 const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Users', href: '/users', icon: UsersIcon },
@@ -25,6 +25,7 @@ const navigation = [
 function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const location = useLocation()
+    const { user, logout } = useCurrentUser()
 
     const isActive = (path: string) => {
         return location.pathname === path
@@ -90,8 +91,8 @@ function DashboardLayout() {
                         <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-indigo-800">
                             <UserCircleIcon className="h-10 w-10 text-indigo-200" />
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">Admin User</p>
-                                <p className="text-xs text-indigo-300 truncate">admin@loanmanager.com</p>
+                                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+                                <p className="text-xs text-indigo-300 truncate">{user?.email}</p>
                             </div>
                         </div>
                     </div>

@@ -1,23 +1,32 @@
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { useRegister } from '../../hooks/useAuth'
+import { registerSchema } from '../../schemas/authSchemas'
+import type { RegisterFormData } from '../../schemas/authSchemas'
 
 function Register() {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
     const register = useRegister()
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const {
+        register: registerField,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<RegisterFormData>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            terms: false,
+        },
+    })
 
-        if (password !== confirmPassword) {
-            alert('Passwords do not match')
-            return
-        }
-
-        register.mutate({ name, email, password })
+    const onSubmit = (data: RegisterFormData) => {
+        // Remove confirmPassword and terms before sending to API
+        const { confirmPassword, terms, ...registerData } = data
+        register.mutate(registerData)
     }
 
     return (
@@ -31,7 +40,7 @@ function Register() {
 
                 {/* Register Card */}
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         {/* Name Field */}
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -40,12 +49,14 @@ function Register() {
                             <input
                                 id="name"
                                 type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...registerField('name')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.name ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="John Doe"
                             />
+                            {errors.name && (
+                                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                            )}
                         </div>
 
                         {/* Email Field */}
@@ -56,12 +67,14 @@ function Register() {
                             <input
                                 id="email"
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...registerField('email')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="you@example.com"
                             />
+                            {errors.email && (
+                                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                            )}
                         </div>
 
                         {/* Password Field */}
@@ -72,13 +85,14 @@ function Register() {
                             <input
                                 id="password"
                                 type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...registerField('password')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="••••••••"
                             />
+                            {errors.password && (
+                                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                            )}
                         </div>
 
                         {/* Confirm Password Field */}
@@ -89,33 +103,39 @@ function Register() {
                             <input
                                 id="confirmPassword"
                                 type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...registerField('confirmPassword')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="••••••••"
                             />
+                            {errors.confirmPassword && (
+                                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                            )}
                         </div>
 
                         {/* Terms & Conditions */}
-                        <div className="flex items-start">
-                            <input
-                                id="terms"
-                                type="checkbox"
-                                required
-                                className="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                            />
-                            <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                                I agree to the{' '}
-                                <Link to="/terms" className="text-indigo-600 hover:text-indigo-700">
-                                    Terms and Conditions
-                                </Link>{' '}
-                                and{' '}
-                                <Link to="/privacy" className="text-indigo-600 hover:text-indigo-700">
-                                    Privacy Policy
-                                </Link>
-                            </label>
+                        <div>
+                            <div className="flex items-start">
+                                <input
+                                    id="terms"
+                                    type="checkbox"
+                                    {...registerField('terms')}
+                                    className="w-4 h-4 mt-1 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                />
+                                <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                                    I agree to the{' '}
+                                    <Link to="/terms" className="text-indigo-600 hover:text-indigo-700">
+                                        Terms and Conditions
+                                    </Link>{' '}
+                                    and{' '}
+                                    <Link to="/privacy" className="text-indigo-600 hover:text-indigo-700">
+                                        Privacy Policy
+                                    </Link>
+                                </label>
+                            </div>
+                            {errors.terms && (
+                                <p className="mt-1 text-sm text-red-600">{errors.terms.message}</p>
+                            )}
                         </div>
 
                         {/* Error Message */}
@@ -130,7 +150,7 @@ function Register() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={register.isPending}
+                            disabled={isSubmitting || register.isPending}
                             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                         >
                             {register.isPending ? (

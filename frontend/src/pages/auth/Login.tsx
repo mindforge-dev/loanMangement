@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router'
 import { useLogin } from '../../hooks/useAuth'
+import { loginSchema } from '../../schemas/authSchemas'
+import type { LoginFormData } from '../../schemas/authSchemas'
 
 function Login() {
-    const [email, setEmail] = useState('admin@mindforge.com')
-    const [password, setPassword] = useState('admin123')
     const login = useLogin()
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        login.mutate({ email, password })
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: 'admin@mindforge.com',
+            password: 'admin123',
+        },
+    })
+
+    const onSubmit = (data: LoginFormData) => {
+        login.mutate(data)
     }
 
     return (
@@ -23,7 +35,7 @@ function Login() {
 
                 {/* Login Card */}
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         {/* Email Field */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -32,12 +44,14 @@ function Login() {
                             <input
                                 id="email"
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...register('email')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="you@example.com"
                             />
+                            {errors.email && (
+                                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                            )}
                         </div>
 
                         {/* Password Field */}
@@ -48,12 +62,14 @@ function Login() {
                             <input
                                 id="password"
                                 type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                {...register('password')}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${errors.password ? 'border-red-500' : 'border-gray-300'
+                                    }`}
                                 placeholder="••••••••"
                             />
+                            {errors.password && (
+                                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                            )}
                         </div>
 
                         {/* Remember Me & Forgot Password */}
@@ -82,7 +98,7 @@ function Login() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={login.isPending}
+                            disabled={isSubmitting || login.isPending}
                             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                         >
                             {login.isPending ? (
