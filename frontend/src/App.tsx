@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router'
 import DashboardLayout from './layouts/DashboardLayout'
-import Dashboard from './pages/Dashboard'
-import Users from './pages/Users'
-import Loans from './pages/Loans'
-import Payments from './pages/Payments'
-import Reports from './pages/Reports'
-import Settings from './pages/Settings'
+import {
+  Dashboard,
+  Users,
+  Loans,
+  Payments,
+  Reports,
+  Settings
+} from './pages/dashboard'
 
 function App() {
   return (

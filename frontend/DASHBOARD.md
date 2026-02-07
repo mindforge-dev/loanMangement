@@ -19,12 +19,14 @@ frontend/
 │   ├── layouts/
 │   │   └── DashboardLayout.tsx    # Main dashboard layout with sidebar
 │   ├── pages/
-│   │   ├── Dashboard.tsx          # Home dashboard with stats
-│   │   ├── Users.tsx              # User management page
-│   │   ├── Loans.tsx              # Loan management page
-│   │   ├── Payments.tsx           # Payment tracking page
-│   │   ├── Reports.tsx            # Reports and analytics
-│   │   └── Settings.tsx           # Application settings
+│   │   └── dashboard/             # Dashboard pages directory
+│   │       ├── index.ts           # Barrel exports
+│   │       ├── Dashboard.tsx      # Home dashboard with stats
+│   │       ├── Users.tsx          # User management page
+│   │       ├── Loans.tsx          # Loan management page
+│   │       ├── Payments.tsx       # Payment tracking page
+│   │       ├── Reports.tsx        # Reports and analytics
+│   │       └── Settings.tsx       # Application settings
 │   ├── App.tsx                    # Main app with routing
 │   └── main.tsx                   # Application entry point
 ```
