@@ -18,7 +18,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://www.zcoder.space",
-    "https://zcoder.space"
+    "https://zcoder.space",
+    "http://localhost:5174"
   ],
   credentials: true
 }));
@@ -26,13 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/auth", authRoutes);
-app.use("/dashboard/users", userRoutes);
-app.use("/dashboard/borrowers", borrowerRoutes);
-app.use("/dashboard/interest-rates", interestRateRoutes);
-app.use("/dashboard/loans", loanRoutes);
-app.use("/dashboard/transactions", transactionRoutes);
-app.use("/dashboard/contracts", contractRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/dashboard/users", userRoutes);
+app.use("/api/dashboard/borrowers", borrowerRoutes);
+app.use("/api/dashboard/interest-rates", interestRateRoutes);
+app.use("/api/dashboard/loans", loanRoutes);
+app.use("/api/dashboard/transactions", transactionRoutes);
+app.use("/api/dashboard/contracts", contractRoutes);
 
 // Root Endpoint
 app.get("/", (req, res) => {
