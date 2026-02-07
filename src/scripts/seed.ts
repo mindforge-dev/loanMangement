@@ -4,12 +4,13 @@ import { Borrower } from "../modules/borrowers/borrower.entity";
 import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
 import { Loan, LoanStatus, LoanType } from "../modules/loans/loan.entity";
 import { Transaction, TransactionType } from "../modules/transactions/transactions.entity";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 async function seed() {
   try {
     console.log("Initializing data source...");
     AppDataSource.setOptions({ synchronize: false, dropSchema: false, logging: ["error"] });
+    console.log(`Connecting to DB: Host=${process.env.DB_HOST}, Name=${process.env.DB_NAME}, Type=${AppDataSource.options.type}`);
     await AppDataSource.initialize();
     console.log("Data source initialized.");
 
@@ -20,10 +21,16 @@ async function seed() {
     // Seed Users
     console.log("Seeding users...");
     const adminEmail = "admin@mindforge.com";
+
+    console.log("Checking for existing admin...");
     const existingAdmin = await userRepository.findOneBy({ email: adminEmail });
+    console.log("Admin check result:", existingAdmin ? "Found" : "Not Found");
 
     if (!existingAdmin) {
+      console.log("Hashing password...");
       const adminPassword = await bcrypt.hash("admin123", 10);
+      console.log("Password hashed.");
+
       await userRepository.save({
         name: "System Admin",
         email: adminEmail,

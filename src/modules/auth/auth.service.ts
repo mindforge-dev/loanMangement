@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { userRepository, UserRepository } from '../users/users.repository';
 import { signToken } from '../../common/utils/jwt';
 import { BadRequestError, UnauthorizedError } from '../../common/errors/http-errors';

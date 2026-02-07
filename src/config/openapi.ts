@@ -29,6 +29,9 @@ export const generateOpenApiSpec = () => {
       title: "Loan Management API",
       description: "API documentation for the Loan Management System",
     },
-    servers: [{ url: `http://localhost:${env.PORT}` }],
+    servers: [
+      { url: `http://localhost:${env.PORT}` },
+      { url: "https://www.zcoder.space" },
+    ],
   });
 };
