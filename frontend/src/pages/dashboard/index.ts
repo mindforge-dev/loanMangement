@@ -1,6 +1,8 @@
-export { default as Dashboard } from './Dashboard'
-export { default as Users } from './Users'
-export { default as Loans } from './Loans'
-export { default as Payments } from './Payments'
-export { default as Reports } from './Reports'
-export { default as Settings } from './Settings'
+export { default as Dashboard } from './home'
+export { default as Users } from './users'
+export { default as Loans } from './loans'
+export { default as Payments } from './payments'
+export { default as Reports } from './reports'
+export { default as Settings } from './settings'
+
+

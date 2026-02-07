@@ -8,7 +8,7 @@ import {
     createColumnHelper,
 } from '@tanstack/react-table'
 import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DataTable, Pagination, TableToolbar } from '../../components/table'
+import { DataTable, Pagination, TableToolbar } from '../../../components/table'
 
 type User = {
     id: number
