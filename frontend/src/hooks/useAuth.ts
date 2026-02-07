@@ -1,43 +1,38 @@
 import { useMutation } from '@tanstack/react-query'
 import type { UseMutationResult } from '@tanstack/react-query'
-import { useNavigate } from 'react-router'
 import { login, register, logout } from '../services/authService'
 import type { LoginCredentials, AuthResponse, RegisterData } from '../services/authService'
 
 // Login mutation
 export const useLogin = (): UseMutationResult<AuthResponse, Error, LoginCredentials> => {
-    const navigate = useNavigate()
-
     return useMutation({
         mutationFn: login,
         onSuccess: () => {
-            navigate('/')
+            // Use window.location for hard redirect to ensure auth state is fresh
+            window.location.href = '/'
         },
     })
 }
 
 // Register mutation
 export const useRegister = (): UseMutationResult<AuthResponse, Error, RegisterData> => {
-    const navigate = useNavigate()
-
     return useMutation({
         mutationFn: register,
         onSuccess: () => {
-            navigate('/')
+            // Use window.location for hard redirect to ensure auth state is fresh
+            window.location.href = '/'
         },
     })
 }
 
 // Logout mutation
 export const useLogout = () => {
-    const navigate = useNavigate()
-
     return useMutation({
         mutationFn: async () => {
             logout()
         },
         onSuccess: () => {
-            navigate('/login')
+            window.location.href = '/login'
         },
     })
 }

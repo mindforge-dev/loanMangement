@@ -3,8 +3,8 @@ import { Link } from 'react-router'
 import { useLogin } from '../../hooks/useAuth'
 
 function Login() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [email, setEmail] = useState('admin@mindforge.com')
+    const [password, setPassword] = useState('admin123')
     const login = useLogin()
 
     const handleSubmit = (e: React.FormEvent) => {

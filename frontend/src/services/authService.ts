@@ -8,11 +8,17 @@ export interface LoginCredentials {
 export interface AuthResponse {
     token: string
     user: {
-        id: number
+        id: string
         name: string
         email: string
         role: string
+        createdAt?: string
     }
+}
+
+
+interface BackendAuthResponse {
+    data: AuthResponse
 }
 
 export interface RegisterData {
@@ -23,29 +29,34 @@ export interface RegisterData {
 
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', credentials)
+    const response = await api.post<BackendAuthResponse>('/auth/login', credentials)
 
-    // Store token in localStorage
-    console.log()
-    if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
+
+    const authData = response.data.data
+
+
+    if (authData.token) {
+        localStorage.setItem('token', authData.token)
+        localStorage.setItem('user', JSON.stringify(authData.user))
     }
 
-    return response.data
+    return authData
 }
 
 
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', data)
+    const response = await api.post<BackendAuthResponse>('/auth/register', data)
+
+    // Extract data from nested response
+    const authData = response.data.data
 
     // Store token in localStorage
-    if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
+    if (authData.token) {
+        localStorage.setItem('token', authData.token)
+        localStorage.setItem('user', JSON.stringify(authData.user))
     }
 
-    return response.data
+    return authData
 }
 
 
