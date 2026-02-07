@@ -15,7 +15,7 @@ export interface CreateUserDto {
     status: 'Active' | 'Inactive'
 }
 
-export interface UpdateUserDto extends Partial<CreateUserDto> { }
+export type UpdateUserDto = Partial<CreateUserDto>
 
 // Get all users
 export const getUsers = async (): Promise<User[]> => {

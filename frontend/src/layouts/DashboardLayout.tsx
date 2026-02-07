@@ -123,10 +123,22 @@ function DashboardLayout() {
                                 <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
                             </button>
 
-                            {/* Profile dropdown placeholder */}
-                            <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                <UserCircleIcon className="h-8 w-8 text-gray-500" />
-                            </button>
+                            {/* Profile & Logout */}
+                            <div className="flex items-center space-x-3">
+                                <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <UserCircleIcon className="h-8 w-8 text-gray-500" />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        localStorage.removeItem('token')
+                                        localStorage.removeItem('user')
+                                        window.location.href = '/login'
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </header>
