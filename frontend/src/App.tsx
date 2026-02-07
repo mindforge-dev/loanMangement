@@ -6,6 +6,7 @@ import {
   Dashboard,
   Users,
   Loans,
+  Borrowers,
   Payments,
   Reports,
   Settings
@@ -31,6 +32,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="loans" element={<Loans />} />
+          <Route path="borrowers" element={<Borrowers />} />
           <Route path="payments" element={<Payments />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />

@@ -8,46 +8,46 @@ import {
 } from '@tanstack/react-table'
 import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { DataTable, Pagination, TableToolbar } from '../../../components/table'
-import { useLoans, useDeleteLoan } from '../../../hooks/useLoans'
-import type { Loan } from '../../../services/loanService'
-import { createLoanColumns } from './columns'
+import { useBorrowers, useDeleteBorrower } from '../../../hooks/useBorrowers'
+import type { Borrower } from '../../../services/borrowerService'
+import { createBorrowerColumns } from './columns'
 
-function Loans() {
-    const { data: loans = [], isLoading, error } = useLoans()
-    const deleteLoanMutation = useDeleteLoan()
+function Borrowers() {
+    const { data: borrowers = [], isLoading, error } = useBorrowers()
+    const deleteBorrowerMutation = useDeleteBorrower()
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = useState('')
 
-    const handleEdit = useCallback((loan: Loan) => {
-        console.log('Edit loan:', loan)
+    const handleEdit = useCallback((borrower: Borrower) => {
+        console.log('Edit borrower:', borrower)
         // TODO: Implement edit functionality
     }, [])
 
     const handleDelete = useCallback(async (id: string) => {
-        if (confirm('Are you sure you want to delete this loan?')) {
+        if (confirm('Are you sure you want to delete this borrower?')) {
             try {
-                await deleteLoanMutation.mutateAsync(id)
+                await deleteBorrowerMutation.mutateAsync(id)
             } catch (error) {
-                console.error('Failed to delete loan:', error)
+                console.error('Failed to delete borrower:', error)
             }
         }
-    }, [deleteLoanMutation])
+    }, [deleteBorrowerMutation])
 
-    const handleAddLoan = useCallback(() => {
-        console.log('Add new loan')
-        // TODO: Implement add loan functionality
+    const handleAddBorrower = useCallback(() => {
+        console.log('Add new borrower')
+        // TODO: Implement add borrower functionality
     }, [])
 
     const columns = useMemo(
-        () => createLoanColumns(handleEdit, handleDelete, deleteLoanMutation.isPending),
-        [handleEdit, handleDelete, deleteLoanMutation.isPending]
+        () => createBorrowerColumns(handleEdit, handleDelete, deleteBorrowerMutation.isPending),
+        [handleEdit, handleDelete, deleteBorrowerMutation.isPending]
     )
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
-        data: loans,
+        data: borrowers,
         columns,
         state: {
             sorting,
@@ -67,7 +67,7 @@ function Loans() {
         return (
             <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-md p-8 text-center">
-                    <p className="text-gray-500">Loading loans...</p>
+                    <p className="text-gray-500">Loading borrowers...</p>
                 </div>
             </div>
         )
@@ -77,7 +77,7 @@ function Loans() {
         return (
             <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-md p-8 text-center">
-                    <p className="text-red-500">Error loading loans: {error.message}</p>
+                    <p className="text-red-500">Error loading borrowers: {error.message}</p>
                 </div>
             </div>
         )
@@ -89,10 +89,10 @@ function Loans() {
                 table={table}
                 globalFilter={globalFilter}
                 setGlobalFilter={setGlobalFilter}
-                title="Loans"
-                description="Manage loan applications and approvals"
-                addButtonText="+ Add Loan"
-                onAddClick={handleAddLoan}
+                title="Borrowers"
+                description="Manage borrower information"
+                addButtonText="+ Add Borrower"
+                onAddClick={handleAddBorrower}
             />
 
             <div>
@@ -103,5 +103,4 @@ function Loans() {
     )
 }
 
-export default Loans
-
+export default Borrowers

@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router'
 import {
     HomeIcon,
     UsersIcon,
+    UserGroupIcon,
     DocumentTextIcon,
     CreditCardIcon,
     ChartBarIcon,
@@ -17,6 +18,7 @@ const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Users', href: '/users', icon: UsersIcon },
     { name: 'Loans', href: '/loans', icon: DocumentTextIcon },
+    { name: 'Borrowers', href: '/borrowers', icon: UserGroupIcon },
     { name: 'Payments', href: '/payments', icon: CreditCardIcon },
     { name: 'Reports', href: '/reports', icon: ChartBarIcon },
     { name: 'Settings', href: '/settings', icon: CogIcon },
