@@ -16,19 +16,47 @@ const TransactionResponseSchema = z.object({
     created_at: z.string(),
 });
 
+const PaginationMetaSchema = z.object({
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+});
+
 export const registerTransactionDocs = () => {
     registry.registerPath({
         method: 'get',
         path: '/dashboard/transactions',
         tags: ['Transactions'],
-        summary: 'Get all transactions',
+        summary: 'Get transactions (paginated)',
         security: [{ bearerAuth: [] }],
+        parameters: [
+            {
+                name: 'page',
+                in: 'query',
+                required: false,
+                schema: { type: 'integer', minimum: 1, default: 1 },
+            },
+            {
+                name: 'limit',
+                in: 'query',
+                required: false,
+                schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+            },
+        ],
         responses: {
             200: {
-                description: 'List of transactions',
+                description: 'Paginated list of transactions',
                 content: {
                     'application/json': {
-                        schema: z.object({ data: z.array(TransactionResponseSchema) }),
+                        schema: z.object({
+                            success: z.boolean(),
+                            statusCode: z.number(),
+                            message: z.string(),
+                            data: z.array(TransactionResponseSchema),
+                            meta: PaginationMetaSchema,
+                            timestamp: z.string(),
+                        }),
                     },
                 },
             },

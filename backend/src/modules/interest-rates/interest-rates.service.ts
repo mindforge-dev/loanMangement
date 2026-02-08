@@ -4,6 +4,10 @@ import {
 } from "./interest-rates.repository";
 import { InterestRate } from "./interest-rate.entity";
 import { ICrudService } from "../../common/base/interfaces/service";
+import {
+  PaginatedResult,
+  PaginationParams,
+} from "../../common/pagination/pagination.core";
 
 export class InterestRateService implements ICrudService<InterestRate> {
   private interestRateRepo: InterestRateRepository;
@@ -18,6 +22,12 @@ export class InterestRateService implements ICrudService<InterestRate> {
 
   async findAll(): Promise<InterestRate[]> {
     return this.interestRateRepo.findAll();
+  }
+
+  async findAllPaginated(
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<InterestRate>> {
+    return this.interestRateRepo.findAllPaginated(pagination);
   }
 
   async findById(id: string): Promise<InterestRate | null> {

@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { NotFoundError } from '../errors/http-errors';
 import { ICrudService } from './interfaces/service';
+import { PaginationCore } from '../pagination/pagination.core';
+import { ApiResponseTransformer } from '../transformers/api-response.transformer';
 
 export abstract class BaseController<T> {
     constructor(protected service: ICrudService<T>) { }
@@ -8,7 +10,9 @@ export abstract class BaseController<T> {
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const data = await this.service.create(req.body);
-            res.status(201).json({ data });
+            res
+                .status(201)
+                .json(ApiResponseTransformer.created(data, 'Created successfully'));
         } catch (error) {
             next(error);
         }
@@ -16,8 +20,24 @@ export abstract class BaseController<T> {
 
     findAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (this.service.findAllPaginated) {
+                const { page, limit } = PaginationCore.parse(
+                    req.query?.page,
+                    req.query?.limit,
+                );
+                const result = await this.service.findAllPaginated({ page, limit });
+                res.json(
+                    ApiResponseTransformer.paginated(
+                        result.data,
+                        result.meta,
+                        'Fetched successfully',
+                    ),
+                );
+                return;
+            }
+
             const data = await this.service.findAll();
-            res.json({ data });
+            res.json(ApiResponseTransformer.ok(data, 'Fetched successfully'));
         } catch (error) {
             next(error);
         }
@@ -30,7 +50,7 @@ export abstract class BaseController<T> {
             if (!data) {
                 throw new NotFoundError('Resource not found');
             }
-            res.json({ data });
+            res.json(ApiResponseTransformer.ok(data, 'Fetched successfully'));
         } catch (error) {
             next(error);
         }
@@ -43,7 +63,7 @@ export abstract class BaseController<T> {
             if (!data) {
                 throw new NotFoundError('Resource not found');
             }
-            res.json({ data });
+            res.json(ApiResponseTransformer.ok(data, 'Updated successfully'));
         } catch (error) {
             next(error);
         }

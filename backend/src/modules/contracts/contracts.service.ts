@@ -3,6 +3,10 @@ import { Contract } from "./contract.entity";
 import { contractRepository, ContractRepository } from "./contracts.repository";
 import fs from "fs";
 import path from "path";
+import {
+    PaginatedResult,
+    PaginationParams,
+} from "../../common/pagination/pagination.core";
 
 export class ContractService implements ICrudService<Contract> {
     private contractRepo: ContractRepository;
@@ -17,6 +21,12 @@ export class ContractService implements ICrudService<Contract> {
 
     async findAll(): Promise<Contract[]> {
         return this.contractRepo.findAll();
+    }
+
+    async findAllPaginated(
+        pagination: PaginationParams,
+    ): Promise<PaginatedResult<Contract>> {
+        return this.contractRepo.findAllPaginated(pagination);
     }
 
     async findById(id: string): Promise<Contract | null> {

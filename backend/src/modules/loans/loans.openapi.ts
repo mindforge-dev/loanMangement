@@ -19,6 +19,13 @@ const LoanResponseSchema = z.object({
   updated_at: z.string(),
 });
 
+const PaginationMetaSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
 export const registerLoanDocs = () => {
   registry.registerPath({
     method: "post",
@@ -60,14 +67,35 @@ export const registerLoanDocs = () => {
     method: "get",
     path: "/dashboard/loans",
     tags: ["Loans"],
-    summary: "Get all loans",
+    summary: "Get loans (paginated)",
     security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "page",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, default: 1 },
+      },
+      {
+        name: "limit",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
+      },
+    ],
     responses: {
       200: {
-        description: "List of loans",
+        description: "Paginated list of loans",
         content: {
           "application/json": {
-            schema: z.object({ data: z.array(LoanResponseSchema) }),
+            schema: z.object({
+              success: z.boolean(),
+              statusCode: z.number(),
+              message: z.string(),
+              data: z.array(LoanResponseSchema),
+              meta: PaginationMetaSchema,
+              timestamp: z.string(),
+            }),
           },
         },
       },

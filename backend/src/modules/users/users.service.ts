@@ -1,6 +1,10 @@
 import { userRepository, UserRepository } from './users.repository';
 import { User } from './user.entity';
 import { ICrudService } from '../../common/base/interfaces/service';
+import {
+    PaginatedResult,
+    PaginationParams,
+} from '../../common/pagination/pagination.core';
 
 export class UserService implements ICrudService<User> {
     private userRepo: UserRepository;
@@ -15,6 +19,12 @@ export class UserService implements ICrudService<User> {
 
     async findAll(): Promise<User[]> {
         return this.userRepo.findAll();
+    }
+
+    async findAllPaginated(
+        pagination: PaginationParams,
+    ): Promise<PaginatedResult<User>> {
+        return this.userRepo.findAllPaginated(pagination);
     }
 
     async findById(id: string): Promise<User | null> {

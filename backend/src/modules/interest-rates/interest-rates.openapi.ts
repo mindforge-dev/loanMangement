@@ -9,6 +9,13 @@ const InterestRateResponseSchema = z.object({
   updated_at: z.string(),
 });
 
+const PaginationMetaSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
 export const registerInterestRateDocs = () => {
   registry.registerPath({
     method: "post",
@@ -44,14 +51,35 @@ export const registerInterestRateDocs = () => {
     method: "get",
     path: "/dashboard/interest-rates",
     tags: ["Interest Rates"],
-    summary: "Get all interest rates",
+    summary: "Get interest rates (paginated)",
     security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "page",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, default: 1 },
+      },
+      {
+        name: "limit",
+        in: "query",
+        required: false,
+        schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
+      },
+    ],
     responses: {
       200: {
-        description: "List of interest rates",
+        description: "Paginated list of interest rates",
         content: {
           "application/json": {
-            schema: z.object({ data: z.array(InterestRateResponseSchema) }),
+            schema: z.object({
+              success: z.boolean(),
+              statusCode: z.number(),
+              message: z.string(),
+              data: z.array(InterestRateResponseSchema),
+              meta: PaginationMetaSchema,
+              timestamp: z.string(),
+            }),
           },
         },
       },

@@ -3,6 +3,10 @@ import { Transaction, TransactionType } from "./transactions.entity";
 import { transactionRepository, TransactionRepository } from "./transactions.repository";
 import { AppDataSource } from "../../config/datasource";
 import { Loan, LoanStatus } from "../loans/loan.entity";
+import {
+    PaginatedResult,
+    PaginationParams,
+} from "../../common/pagination/pagination.core";
 
 export class TransactionService implements ICrudService<Transaction> {
     private transactionRepo: TransactionRepository;
@@ -55,7 +59,13 @@ export class TransactionService implements ICrudService<Transaction> {
     }
 
     async findAll(): Promise<Transaction[]> {
-        return this.transactionRepo.findAll();
+        return this.transactionRepo.findAllPaginated({ page: 1, limit: 1000 }).then(result => result.data);
+    }
+
+    async findAllPaginated(
+        pagination: PaginationParams,
+    ): Promise<PaginatedResult<Transaction>> {
+        return this.transactionRepo.findAllPaginated(pagination);
     }
 
     async findById(id: string): Promise<Transaction | null> {

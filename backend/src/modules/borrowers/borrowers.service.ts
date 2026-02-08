@@ -1,6 +1,10 @@
 import { borrowerRepository, BorrowerRepository } from "./borrowers.repository";
 import { Borrower } from "./borrower.entity";
 import { ICrudService } from "../../common/base/interfaces/service";
+import {
+  PaginatedResult,
+  PaginationParams,
+} from "../../common/pagination/pagination.core";
 
 export class BorrowerService implements ICrudService<Borrower> {
   private borrowerRepo: BorrowerRepository;
@@ -15,6 +19,12 @@ export class BorrowerService implements ICrudService<Borrower> {
 
   async findAll(): Promise<Borrower[]> {
     return this.borrowerRepo.findAll();
+  }
+
+  async findAllPaginated(
+    pagination: PaginationParams,
+  ): Promise<PaginatedResult<Borrower>> {
+    return this.borrowerRepo.findAllPaginated(pagination);
   }
 
   async findById(id: string): Promise<Borrower | null> {

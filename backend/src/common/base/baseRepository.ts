@@ -1,5 +1,10 @@
 import { Repository, ObjectLiteral, DeepPartial } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import {
+    PaginatedResult,
+    PaginationCore,
+    PaginationParams,
+} from "../pagination/pagination.core";
 
 export class BaseRepository<T extends ObjectLiteral> {
     constructor(protected repo: Repository<T>) { }
@@ -10,6 +15,21 @@ export class BaseRepository<T extends ObjectLiteral> {
 
     async findAll(): Promise<T[]> {
         return this.repo.find();
+    }
+
+    async findAllPaginated(
+        pagination: PaginationParams,
+    ): Promise<PaginatedResult<T>> {
+        const { page, limit } = pagination;
+        const [data, total] = await this.repo.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        return {
+            data,
+            meta: PaginationCore.buildMeta(total, page, limit),
+        };
     }
 
     async findById(id: string): Promise<T | null> {
