@@ -80,7 +80,13 @@ export const createLoan = async (data: CreateLoanDto): Promise<Loan> => {
 
 // Update loan
 export const updateLoan = async (id: string, data: UpdateLoanDto): Promise<Loan> => {
-    const response = await api.patch<{ data: Loan }>(`/dashboard/loans/${id}`, data)
+    const response = await api.put<{ data: Loan }>(`/dashboard/loans/${id}`, data)
+    return response.data.data
+}
+
+// Update loan status
+export const updateLoanStatus = async (id: string, status: Loan['status']): Promise<Loan> => {
+    const response = await api.patch<{ data: Loan }>(`/dashboard/loans/${id}/status`, { status })
     return response.data.data
 }
 

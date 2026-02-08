@@ -24,6 +24,7 @@ const formatDate = (dateString: string) => {
 export const createLoanColumns = (
     handleEdit: (loan: Loan) => void,
     handleDelete: (id: string) => void,
+    handleStatusChange: (id: string, status: Loan['status']) => void,
     isDeleting: boolean
 ) => [
         columnHelper.accessor('borrower', {
@@ -97,20 +98,26 @@ export const createLoanColumns = (
             header: 'Status',
             cell: (info) => {
                 const status = info.getValue()
+                const loan = info.row.original
                 const statusColors: Record<string, string> = {
-                    PENDING: 'bg-yellow-100 text-yellow-800',
-                    ACTIVE: 'bg-green-100 text-green-800',
-                    COMPLETED: 'bg-blue-100 text-blue-800',
-                    DEFAULTED: 'bg-red-100 text-red-800',
-                    REJECTED: 'bg-gray-100 text-gray-800',
+                    PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                    ACTIVE: 'bg-green-100 text-green-800 border-green-300',
+                    COMPLETED: 'bg-blue-100 text-blue-800 border-blue-300',
+                    DEFAULTED: 'bg-red-100 text-red-800 border-red-300',
+                    REJECTED: 'bg-gray-100 text-gray-800 border-gray-300',
                 }
                 return (
-                    <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800'
-                            }`}
+                    <select
+                        value={status}
+                        onChange={(e) => handleStatusChange(loan.id, e.target.value as Loan['status'])}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-300'}`}
                     >
-                        {status}
-                    </span>
+                        <option value="PENDING">PENDING</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="DEFAULTED">DEFAULTED</option>
+                        <option value="REJECTED">REJECTED</option>
+                    </select>
                 )
             },
         }),

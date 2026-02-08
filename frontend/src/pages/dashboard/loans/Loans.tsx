@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-table'
 import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { DataTable, TableToolbar } from '../../../components/table'
-import { useLoans, useDeleteLoan } from '../../../hooks/useLoans'
+import { useLoans, useDeleteLoan, useUpdateLoanStatus } from '../../../hooks/useLoans'
 import { useBorrowers } from '../../../hooks/useBorrowers'
 import type { Loan } from '../../../services/loanService'
 import { createLoanColumns } from './columns'
@@ -23,6 +23,7 @@ function Loans() {
 
     const { data: loansResponse, isLoading, error } = useLoans({ page, limit })
     const deleteLoanMutation = useDeleteLoan()
+    const updateStatusMutation = useUpdateLoanStatus()
 
     // Fetch borrowers for filter dropdown
     const { data: borrowersResponse } = useBorrowers({ page: 1, limit: 1000 })
@@ -76,6 +77,14 @@ function Loans() {
         }
     }, [deleteLoanMutation])
 
+    const handleStatusChange = useCallback(async (id: string, status: Loan['status']) => {
+        try {
+            await updateStatusMutation.mutateAsync({ id, status })
+        } catch (error) {
+            console.error('Failed to update loan status:', error)
+        }
+    }, [updateStatusMutation])
+
     const handleAddLoan = useCallback(() => {
         setIsCreateModalOpen(true)
     }, [])
@@ -105,8 +114,8 @@ function Loans() {
     }, [loans, selectedBorrowerId])
 
     const columns = useMemo(
-        () => createLoanColumns(handleEdit, handleDelete, deleteLoanMutation.isPending),
-        [handleEdit, handleDelete, deleteLoanMutation.isPending]
+        () => createLoanColumns(handleEdit, handleDelete, handleStatusChange, deleteLoanMutation.isPending),
+        [handleEdit, handleDelete, handleStatusChange, deleteLoanMutation.isPending]
     )
 
     // eslint-disable-next-line react-hooks/incompatible-library

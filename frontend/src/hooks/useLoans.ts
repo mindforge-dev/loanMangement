@@ -5,6 +5,7 @@ import {
     getLoan,
     createLoan,
     updateLoan,
+    updateLoanStatus,
     deleteLoan,
 } from '../services/loanService'
 import type {
@@ -63,6 +64,23 @@ export const useUpdateLoan = (): UseMutationResult<
 
     return useMutation({
         mutationFn: ({ id, data }) => updateLoan(id, data),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: loanKeys.lists() })
+            queryClient.invalidateQueries({ queryKey: loanKeys.detail(data.id) })
+        },
+    })
+}
+
+// Update loan status mutation
+export const useUpdateLoanStatus = (): UseMutationResult<
+    Loan,
+    Error,
+    { id: string; status: Loan['status'] }
+> => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ id, status }) => updateLoanStatus(id, status),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: loanKeys.lists() })
             queryClient.invalidateQueries({ queryKey: loanKeys.detail(data.id) })
