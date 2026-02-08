@@ -7,6 +7,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 FRONTEND_DIR="${FRONTEND_DIR:-${PROJECT_ROOT}/frontend}"
 FRONTEND_DEPLOY_DIR="${FRONTEND_DEPLOY_DIR:-}"
 FRONTEND_RELOAD_SERVICE="${FRONTEND_RELOAD_SERVICE:-}"
+FRONTEND_NODE_VERSION="${FRONTEND_NODE_VERSION:-20.19.0}"
 SUDO_BIN="${SUDO_BIN:-sudo}"
 
 if [ -z "${FRONTEND_DEPLOY_DIR}" ]; then
@@ -35,11 +36,21 @@ if [ "$(realpath "${FRONTEND_DIR}")" = "$(realpath "${FRONTEND_DEPLOY_DIR}")" ];
   exit 1
 fi
 
+# Load nvm if available and switch to required Node version for Vite build.
+if [ -s "${HOME}/.nvm/nvm.sh" ]; then
+  # shellcheck source=/dev/null
+  . "${HOME}/.nvm/nvm.sh"
+  nvm install "${FRONTEND_NODE_VERSION}" >/dev/null
+  nvm use "${FRONTEND_NODE_VERSION}" >/dev/null
+fi
+
 echo "Building frontend from ${FRONTEND_DIR}"
 cd "${FRONTEND_DIR}"
 echo "Install path: $(pwd)"
 ls -l package.json package-lock.json 2>/dev/null || true
+echo "node version: $(node -v)"
 echo "npm version: $(npm -v)"
+env -u NODE_ENV NPM_CONFIG_PRODUCTION=false npm ci --include=dev
 npm run build
 
 echo "Syncing dist to ${FRONTEND_DEPLOY_DIR}"
