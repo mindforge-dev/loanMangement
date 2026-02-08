@@ -42,7 +42,7 @@ ls -l package.json package-lock.json 2>/dev/null || true
 echo "npm version: $(npm -v)"
 echo "npm package-lock config: $(npm config get package-lock || true)"
 if [ -f "package-lock.json" ]; then
-  NPM_CONFIG_PACKAGE_LOCK=true npm ci --include=dev
+  NPM_CONFIG_PACKAGE_LOCK=true npm ci
 else
   echo "package-lock.json not found; cannot run npm ci"
   exit 1
