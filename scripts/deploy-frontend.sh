@@ -36,6 +36,23 @@ if [ "$(realpath "${FRONTEND_DIR}")" = "$(realpath "${FRONTEND_DEPLOY_DIR}")" ];
   exit 1
 fi
 
+FRONTEND_DIR_REALPATH="$(realpath "${FRONTEND_DIR}")"
+FRONTEND_DIST_REALPATH="$(realpath "${FRONTEND_DIR}/dist" 2>/dev/null || true)"
+FRONTEND_DEPLOY_REALPATH="$(realpath "${FRONTEND_DEPLOY_DIR}")"
+
+if [[ "${FRONTEND_DEPLOY_REALPATH}" == "${FRONTEND_DIR_REALPATH}"/* ]]; then
+  echo "FRONTEND_DEPLOY_DIR cannot be inside FRONTEND_DIR"
+  echo "Current: ${FRONTEND_DEPLOY_REALPATH}"
+  echo "Use a separate path like /var/www/loanMangement"
+  exit 1
+fi
+
+if [ -n "${FRONTEND_DIST_REALPATH}" ] && [ "${FRONTEND_DEPLOY_REALPATH}" = "${FRONTEND_DIST_REALPATH}" ]; then
+  echo "FRONTEND_DEPLOY_DIR cannot be the dist directory itself"
+  echo "Current: ${FRONTEND_DEPLOY_REALPATH}"
+  exit 1
+fi
+
 # Load nvm if available and switch to required Node version for Vite build.
 if [ -s "${HOME}/.nvm/nvm.sh" ]; then
   # shellcheck source=/dev/null
