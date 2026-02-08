@@ -24,9 +24,25 @@ if ! command -v rsync >/dev/null 2>&1; then
   exit 1
 fi
 
+if [ ! -f "${FRONTEND_DIR}/package.json" ]; then
+  echo "frontend package.json not found: ${FRONTEND_DIR}/package.json"
+  exit 1
+fi
+
+if [ "$(realpath "${FRONTEND_DIR}")" = "$(realpath "${FRONTEND_DEPLOY_DIR}")" ]; then
+  echo "FRONTEND_DEPLOY_DIR cannot be the same as FRONTEND_DIR"
+  echo "Set FRONTEND_DEPLOY_DIR to a web root like /var/www/loanMangement"
+  exit 1
+fi
+
 echo "Building frontend from ${FRONTEND_DIR}"
 cd "${FRONTEND_DIR}"
-npm ci
+if [ -f "package-lock.json" ]; then
+  npm ci
+else
+  echo "package-lock.json not found, running npm install fallback"
+  npm install
+fi
 npm run build
 
 echo "Syncing dist to ${FRONTEND_DEPLOY_DIR}"
