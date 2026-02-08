@@ -26,6 +26,19 @@ export const createLoanColumns = (
     handleDelete: (id: string) => void,
     isDeleting: boolean
 ) => [
+        columnHelper.accessor('borrower', {
+            id: 'borrower_name',
+            header: 'Borrower',
+            cell: (info) => {
+                const borrower = info.getValue()
+                return (
+                    <div className="text-sm font-medium text-gray-900">
+                        {borrower?.full_name || 'N/A'}
+                    </div>
+                )
+            },
+            enableColumnFilter: true,
+        }),
         columnHelper.accessor('loan_type', {
             header: 'Loan Type',
             cell: (info) => (

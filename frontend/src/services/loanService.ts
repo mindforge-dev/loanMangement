@@ -14,6 +14,12 @@ export interface Loan {
     status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'DEFAULTED' | 'REJECTED'
     created_at: string
     updated_at: string
+    borrower?: {
+        id: string
+        full_name: string
+        email: string
+        phone: string
+    }
 }
 
 export interface PaginationMeta {
