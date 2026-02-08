@@ -173,4 +173,42 @@ export const registerLoanDocs = () => {
       404: { description: "Loan not found" },
     },
   });
+
+  registry.registerPath({
+    method: "patch",
+    path: "/dashboard/loans/{id}/status",
+    tags: ["Loans"],
+    summary: "Update loan status (Admin only)",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: { type: "string", format: "uuid" },
+      },
+    ],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              status: z.nativeEnum(LoanStatus),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Loan status updated",
+        content: {
+          "application/json": {
+            schema: z.object({ data: LoanResponseSchema }),
+          },
+        },
+      },
+      404: { description: "Loan not found" },
+    },
+  });
 };

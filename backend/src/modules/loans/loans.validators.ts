@@ -57,3 +57,14 @@ export const UpdateLoanSchema = z.object({
     })
     .openapi("UpdateLoanRequest"),
 });
+
+export const UpdateLoanStatusSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  body: z
+    .object({
+      status: z.nativeEnum(LoanStatus).openapi({ example: LoanStatus.ACTIVE }),
+    })
+    .openapi("UpdateLoanStatusRequest"),
+});
