@@ -29,6 +29,7 @@ export interface LoanFormProps {
     initialData?: Partial<LoanFormData>
     loanId?: string
     mode?: 'create' | 'edit'
+    onSuccess?: (mode: 'create' | 'edit') => void
 }
 
 export const getInitialFormData = (initialData?: Partial<LoanFormData>): LoanFormData => ({

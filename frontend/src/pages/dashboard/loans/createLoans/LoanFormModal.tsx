@@ -11,7 +11,8 @@ export default function LoanFormModal({
     onClose,
     initialData,
     loanId,
-    mode = 'create'
+    mode = 'create',
+    onSuccess
 }: LoanFormProps) {
     const createLoanMutation = useCreateLoan()
     const updateLoanMutation = useUpdateLoan()
@@ -53,6 +54,7 @@ export default function LoanFormModal({
             }
             resetForm()
             onClose()
+            onSuccess?.(mode)
         } catch (error) {
             console.error(`Failed to ${mode} loan:`, error)
         }

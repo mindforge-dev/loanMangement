@@ -14,12 +14,24 @@ import type { Loan } from '../../../services/loanService'
 import { createLoanColumns } from './columns'
 import CreateLoan from './createLoans/CreateLoan'
 import ServerPagination from './ServerPagination'
+import Notification from '../../../components/Notification'
 
 function Loans() {
     // Pagination state
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(10)
     const [selectedBorrowerId, setSelectedBorrowerId] = useState<string>('')
+
+    // Notification state
+    const [notification, setNotification] = useState<{
+        message: string
+        type: 'success' | 'error' | 'info' | 'warning'
+        isVisible: boolean
+    }>({
+        message: '',
+        type: 'success',
+        isVisible: false
+    })
 
     const { data: loansResponse, isLoading, error } = useLoans({ page, limit })
     const deleteLoanMutation = useDeleteLoan()
@@ -80,8 +92,18 @@ function Loans() {
     const handleStatusChange = useCallback(async (id: string, status: Loan['status']) => {
         try {
             await updateStatusMutation.mutateAsync({ id, status })
+            setNotification({
+                message: `Loan status updated to ${status} successfully!`,
+                type: 'success',
+                isVisible: true
+            })
         } catch (error) {
             console.error('Failed to update loan status:', error)
+            setNotification({
+                message: 'Failed to update loan status. Please try again.',
+                type: 'error',
+                isVisible: true
+            })
         }
     }, [updateStatusMutation])
 
@@ -213,6 +235,13 @@ function Loans() {
             <CreateLoan
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={(mode) => {
+                    setNotification({
+                        message: mode === 'create' ? 'Loan created successfully!' : 'Loan updated successfully!',
+                        type: 'success',
+                        isVisible: true
+                    })
+                }}
             />
 
             <CreateLoan
@@ -228,6 +257,21 @@ function Loans() {
                     start_date: selectedLoan.start_date,
                     term_months: selectedLoan.term_months,
                 } : undefined}
+                onSuccess={(mode) => {
+                    setNotification({
+                        message: mode === 'create' ? 'Loan created successfully!' : 'Loan updated successfully!',
+                        type: 'success',
+                        isVisible: true
+                    })
+                }}
+            />
+
+            {/* Notification */}
+            <Notification
+                message={notification.message}
+                type={notification.type}
+                isVisible={notification.isVisible}
+                onClose={() => setNotification({ ...notification, isVisible: false })}
             />
         </>
     )
