@@ -15,8 +15,13 @@ export default function LoanFormModal({
 }: LoanFormProps) {
     const createLoanMutation = useCreateLoan()
     const updateLoanMutation = useUpdateLoan()
-    const { data: borrowers = [], isLoading: borrowersLoading } = useBorrowers()
+
+    // Fetch all borrowers and interest rates for dropdowns (use high limit)
+    const { data: borrowersResponse, isLoading: borrowersLoading } = useBorrowers({ page: 1, limit: 1000 })
     const { data: interestRates = [], isLoading: ratesLoading } = useInterestRates()
+
+    // Extract data from paginated responses
+    const borrowers = borrowersResponse?.data || []
 
     const {
         formData,

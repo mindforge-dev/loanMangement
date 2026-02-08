@@ -7,14 +7,23 @@ import {
     getFilteredRowModel,
 } from '@tanstack/react-table'
 import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DataTable, Pagination, TableToolbar } from '../../../components/table'
+import { DataTable, TableToolbar } from '../../../components/table'
 import { useBorrowers, useDeleteBorrower } from '../../../hooks/useBorrowers'
 import type { Borrower } from '../../../services/borrowerService'
 import { createBorrowerColumns } from './columns'
+import ServerPagination from './ServerPagination'
 
 function Borrowers() {
-    const { data: borrowers = [], isLoading, error } = useBorrowers()
+    // Pagination state
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10)
+
+    const { data: borrowersResponse, isLoading, error } = useBorrowers({ page, limit })
     const deleteBorrowerMutation = useDeleteBorrower()
+
+    // Extract borrowers and meta from paginated response
+    const borrowers = borrowersResponse?.data || []
+    const meta = borrowersResponse?.meta
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -40,6 +49,15 @@ function Borrowers() {
         // TODO: Implement add borrower functionality
     }, [])
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
+
+    const handleLimitChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1) // Reset to first page when changing limit
+    }, [])
+
     const columns = useMemo(
         () => createBorrowerColumns(handleEdit, handleDelete, deleteBorrowerMutation.isPending),
         [handleEdit, handleDelete, deleteBorrowerMutation.isPending]
@@ -61,6 +79,7 @@ function Borrowers() {
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        manualPagination: false, // Client-side pagination for filtered results
     })
 
     if (isLoading) {
@@ -97,7 +116,11 @@ function Borrowers() {
 
             <div>
                 <DataTable table={table} />
-                <Pagination table={table} />
+                <ServerPagination
+                    meta={meta}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
+                />
             </div>
         </div>
     )

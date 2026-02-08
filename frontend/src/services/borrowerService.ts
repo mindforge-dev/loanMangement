@@ -11,6 +11,27 @@ export interface Borrower {
     updated_at: string
 }
 
+export interface PaginationMeta {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+}
+
+export interface PaginatedResponse<T> {
+    success: boolean
+    statusCode: number
+    message: string
+    data: T[]
+    meta: PaginationMeta
+    timestamp: string
+}
+
+export interface PaginationParams {
+    page?: number
+    limit?: number
+}
+
 export interface CreateBorrowerDto {
     full_name: string
     phone: string
@@ -21,10 +42,15 @@ export interface CreateBorrowerDto {
 
 export type UpdateBorrowerDto = Partial<CreateBorrowerDto>
 
-// Get all borrowers
-export const getBorrowers = async (): Promise<Borrower[]> => {
-    const response = await api.get<{ data: Borrower[] }>('/dashboard/borrowers')
-    return response.data.data
+// Get all borrowers with pagination
+export const getBorrowers = async (params?: PaginationParams): Promise<PaginatedResponse<Borrower>> => {
+    const response = await api.get<PaginatedResponse<Borrower>>('/dashboard/borrowers', {
+        params: {
+            page: params?.page || 1,
+            limit: params?.limit || 10,
+        }
+    })
+    return response.data
 }
 
 // Get single borrower

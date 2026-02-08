@@ -7,22 +7,28 @@ import {
     updateBorrower,
     deleteBorrower,
 } from '../services/borrowerService'
-import type { Borrower, CreateBorrowerDto, UpdateBorrowerDto } from '../services/borrowerService'
+import type {
+    Borrower,
+    CreateBorrowerDto,
+    UpdateBorrowerDto,
+    PaginatedResponse,
+    PaginationParams
+} from '../services/borrowerService'
 
 // Query keys
 export const borrowerKeys = {
     all: ['borrowers'] as const,
     lists: () => [...borrowerKeys.all, 'list'] as const,
-    list: (filters: string) => [...borrowerKeys.lists(), { filters }] as const,
+    list: (params?: PaginationParams) => [...borrowerKeys.lists(), params] as const,
     details: () => [...borrowerKeys.all, 'detail'] as const,
     detail: (id: string) => [...borrowerKeys.details(), id] as const,
 }
 
-// Get all borrowers
-export const useBorrowers = (): UseQueryResult<Borrower[], Error> => {
+// Get all borrowers with pagination
+export const useBorrowers = (params?: PaginationParams): UseQueryResult<PaginatedResponse<Borrower>, Error> => {
     return useQuery({
-        queryKey: borrowerKeys.lists(),
-        queryFn: getBorrowers,
+        queryKey: borrowerKeys.list(params),
+        queryFn: () => getBorrowers(params),
     })
 }
 
