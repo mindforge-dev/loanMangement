@@ -21,10 +21,12 @@ function Loans() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null)
 
     const handleEdit = useCallback((loan: Loan) => {
-        console.log('Edit loan:', loan)
-        // TODO: Implement edit functionality
+        setSelectedLoan(loan)
+        setIsEditModalOpen(true)
     }, [])
 
     const handleDelete = useCallback(async (id: string) => {
@@ -39,6 +41,11 @@ function Loans() {
 
     const handleAddLoan = useCallback(() => {
         setIsCreateModalOpen(true)
+    }, [])
+
+    const handleCloseEditModal = useCallback(() => {
+        setIsEditModalOpen(false)
+        setSelectedLoan(null)
     }, [])
 
     const columns = useMemo(
@@ -106,6 +113,21 @@ function Loans() {
             <CreateLoan
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
+            />
+
+            <CreateLoan
+                isOpen={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                mode="edit"
+                loanId={selectedLoan?.id}
+                initialData={selectedLoan ? {
+                    borrower_id: selectedLoan.borrower_id,
+                    interest_rate_id: selectedLoan.interest_rate_id,
+                    principal_amount: selectedLoan.principal_amount,
+                    loan_type: selectedLoan.loan_type,
+                    start_date: selectedLoan.start_date,
+                    term_months: selectedLoan.term_months,
+                } : undefined}
             />
         </>
     )

@@ -44,6 +44,57 @@ export class LoanService implements ICrudService<Loan> {
   }
 
   async update(id: string, data: Partial<Loan>): Promise<Loan | null> {
+    const shouldRecalculate =
+      data.interest_rate_id !== undefined ||
+      data.principal_amount !== undefined ||
+      data.term_months !== undefined;
+
+    let existingLoan: Loan | null = null;
+    if (shouldRecalculate) {
+      existingLoan = await this.loanRepo.findById(id);
+    }
+
+    if (data.interest_rate_id) {
+      const rate = await interestRateRepository.findById(data.interest_rate_id);
+      if (rate) {
+        data.interest_rate_snapshot = rate.rate_percent;
+      }
+    }
+
+    if (
+      shouldRecalculate &&
+      data.current_balance === undefined
+    ) {
+      const principalValue =
+        data.principal_amount !== undefined
+          ? data.principal_amount
+          : existingLoan?.principal_amount;
+      const termMonthsValue =
+        data.term_months !== undefined
+          ? data.term_months
+          : existingLoan?.term_months;
+
+      if (principalValue === undefined || termMonthsValue === undefined) {
+        return this.loanRepo.update(id, data as any);
+      }
+
+      const principal = Number(principalValue);
+      const termYears = Number(termMonthsValue) / 12;
+      const ratePercent =
+        data.interest_rate_snapshot !== undefined
+          ? Number(data.interest_rate_snapshot)
+          : existingLoan?.interest_rate_snapshot !== undefined
+            ? Number(existingLoan.interest_rate_snapshot)
+            : undefined;
+
+      if (ratePercent !== undefined) {
+        const interest = principal * (ratePercent / 100) * termYears;
+        data.current_balance = principal + interest;
+      } else {
+        data.current_balance = principal;
+      }
+    }
+
     return this.loanRepo.update(id, data as any);
   }
 

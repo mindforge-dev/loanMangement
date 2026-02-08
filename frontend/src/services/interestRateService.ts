@@ -2,17 +2,15 @@ import { api } from '../lib/axios'
 
 export interface InterestRate {
     id: string
-    rate_type: string
-    rate_value: string
-    effective_date: string
+    rate_percent: number
+    is_active: boolean
     created_at: string
     updated_at: string
 }
 
 export interface CreateInterestRateDto {
-    rate_type: string
-    rate_value: string
-    effective_date: string
+    rate_percent: number
+    is_active: boolean
 }
 
 export type UpdateInterestRateDto = Partial<CreateInterestRateDto>

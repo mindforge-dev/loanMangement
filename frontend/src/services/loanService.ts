@@ -5,13 +5,13 @@ export interface Loan {
     borrower_id: string
     interest_rate_id: string
     principal_amount: string
-    loan_type: 'PERSONAL' | 'BUSINESS' | 'MORTGAGE' | 'AUTO'
+    loan_type: 'PERSONAL' | 'HOME' | 'AUTO' | 'BUSINESS' | 'EDUCATION' | 'OTHER'
     start_date: string
     end_date: string
     term_months: number
     interest_rate_snapshot: string
     current_balance: string
-    status: 'ACTIVE' | 'PENDING' | 'CLOSED' | 'DEFAULTED'
+    status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'DEFAULTED' | 'REJECTED'
     created_at: string
     updated_at: string
 }
@@ -19,8 +19,8 @@ export interface Loan {
 export interface CreateLoanDto {
     borrower_id: string
     interest_rate_id: string
-    principal_amount: string
-    loan_type: 'PERSONAL' | 'BUSINESS' | 'MORTGAGE' | 'AUTO'
+    principal_amount: number
+    loan_type: 'PERSONAL' | 'HOME' | 'AUTO' | 'BUSINESS' | 'EDUCATION' | 'OTHER'
     start_date: string
     end_date: string
     term_months: number

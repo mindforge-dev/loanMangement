@@ -100,4 +100,49 @@ export const registerLoanDocs = () => {
       404: { description: "Loan not found" },
     },
   });
+
+  registry.registerPath({
+    method: "put",
+    path: "/dashboard/loans/{id}",
+    tags: ["Loans"],
+    summary: "Update loan (Admin only)",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: { type: "string", format: "uuid" },
+      },
+    ],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              interest_rate_id: z.string().uuid().optional(),
+              principal_amount: z.number().optional(),
+              loan_type: z.string().optional(),
+              start_date: z.string().optional(),
+              end_date: z.string().optional(),
+              term_months: z.number().optional(),
+              status: z.nativeEnum(LoanStatus).optional(),
+              current_balance: z.number().optional(),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Loan updated",
+        content: {
+          "application/json": {
+            schema: z.object({ data: LoanResponseSchema }),
+          },
+        },
+      },
+      404: { description: "Loan not found" },
+    },
+  });
 };
