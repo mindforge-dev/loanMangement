@@ -19,7 +19,8 @@ app.use(cors({
     "http://localhost:3000",
     "https://www.zcoder.space",
     "https://zcoder.space",
-    "http://localhost:5174"
+    "http://localhost:5173",
+    "https://loanmanagement.zcoder.space"
   ],
   credentials: true
 }));
