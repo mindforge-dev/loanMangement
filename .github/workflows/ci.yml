@@ -1,13 +1,14 @@
-name: CI
+name: CI-CD
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
+  push:
+    branches:
+      - "**"
 
 jobs:
-  frontend:
-    name: Frontend (React)
+  frontend-ci:
+    name: Frontend CI
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -20,9 +21,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Lint
         run: npm run lint
@@ -30,8 +33,8 @@ jobs:
       - name: Build
         run: npm run build
 
-  backend:
-    name: Backend (Docker build)
+  backend-ci:
+    name: Backend CI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,3 +42,39 @@ jobs:
 
       - name: Build Docker services
         run: docker compose -f backend/docker-compose.yml build
+
+  deploy-vps:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs:
+      - frontend-ci
+      - backend-ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy backend + frontend on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            set -Eeuo pipefail
+
+            REPO_DIR="${{ secrets.VPS_PROJECT_PATH }}"
+            BRANCH="main"
+
+            cd "$REPO_DIR"
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+
+            chmod +x scripts/deploy-backend.sh scripts/deploy-frontend.sh
+
+            ./scripts/deploy-backend.sh
+
+            FRONTEND_DEPLOY_DIR="${{ secrets.FRONTEND_DEPLOY_DIR }}" \
+            FRONTEND_RELOAD_SERVICE="${{ secrets.FRONTEND_RELOAD_SERVICE }}" \
+            ./scripts/deploy-frontend.sh
