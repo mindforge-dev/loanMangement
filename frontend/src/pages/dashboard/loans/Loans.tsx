@@ -11,6 +11,7 @@ import { DataTable, Pagination, TableToolbar } from '../../../components/table'
 import { useLoans, useDeleteLoan } from '../../../hooks/useLoans'
 import type { Loan } from '../../../services/loanService'
 import { createLoanColumns } from './columns'
+import CreateLoan from './createLoans/CreateLoan'
 
 function Loans() {
     const { data: loans = [], isLoading, error } = useLoans()
@@ -19,6 +20,7 @@ function Loans() {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = useState('')
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     const handleEdit = useCallback((loan: Loan) => {
         console.log('Edit loan:', loan)
@@ -36,8 +38,7 @@ function Loans() {
     }, [deleteLoanMutation])
 
     const handleAddLoan = useCallback(() => {
-        console.log('Add new loan')
-        // TODO: Implement add loan functionality
+        setIsCreateModalOpen(true)
     }, [])
 
     const columns = useMemo(
@@ -84,24 +85,30 @@ function Loans() {
     }
 
     return (
-        <div className="space-y-6">
-            <TableToolbar
-                table={table}
-                globalFilter={globalFilter}
-                setGlobalFilter={setGlobalFilter}
-                title="Loans"
-                description="Manage loan applications and approvals"
-                addButtonText="+ Add Loan"
-                onAddClick={handleAddLoan}
-            />
+        <>
+            <div className="space-y-6">
+                <TableToolbar
+                    table={table}
+                    globalFilter={globalFilter}
+                    setGlobalFilter={setGlobalFilter}
+                    title="Loans"
+                    description="Manage loan applications and approvals"
+                    addButtonText="+ Add Loan"
+                    onAddClick={handleAddLoan}
+                />
 
-            <div>
-                <DataTable table={table} />
-                <Pagination table={table} />
+                <div>
+                    <DataTable table={table} />
+                    <Pagination table={table} />
+                </div>
             </div>
-        </div>
+
+            <CreateLoan
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+            />
+        </>
     )
 }
 
 export default Loans
-

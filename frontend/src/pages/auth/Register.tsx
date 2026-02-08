@@ -25,6 +25,8 @@ function Register() {
 
     const onSubmit = (data: RegisterFormData) => {
         // Remove confirmPassword and terms before sending to API
+        //seem like ai can't fix the eslint error
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars 
         const { confirmPassword, terms, ...registerData } = data
         register.mutate(registerData)
     }
