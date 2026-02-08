@@ -7,15 +7,24 @@ import {
     getFilteredRowModel,
 } from '@tanstack/react-table'
 import type { SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DataTable, Pagination, TableToolbar } from '../../../components/table'
+import { DataTable, TableToolbar } from '../../../components/table'
 import { useLoans, useDeleteLoan } from '../../../hooks/useLoans'
 import type { Loan } from '../../../services/loanService'
 import { createLoanColumns } from './columns'
 import CreateLoan from './createLoans/CreateLoan'
+import ServerPagination from './ServerPagination'
 
 function Loans() {
-    const { data: loans = [], isLoading, error } = useLoans()
+    // Pagination state
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10)
+
+    const { data: loansResponse, isLoading, error } = useLoans({ page, limit })
     const deleteLoanMutation = useDeleteLoan()
+
+    // Extract loans and meta from paginated response
+    const loans = loansResponse?.data || []
+    const meta = loansResponse?.meta
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -48,6 +57,15 @@ function Loans() {
         setSelectedLoan(null)
     }, [])
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
+
+    const handleLimitChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1) // Reset to first page when changing limit
+    }, [])
+
     const columns = useMemo(
         () => createLoanColumns(handleEdit, handleDelete, deleteLoanMutation.isPending),
         [handleEdit, handleDelete, deleteLoanMutation.isPending]
@@ -69,6 +87,7 @@ function Loans() {
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        manualPagination: false, // Client-side pagination for filtered results
     })
 
     if (isLoading) {
@@ -106,7 +125,11 @@ function Loans() {
 
                 <div>
                     <DataTable table={table} />
-                    <Pagination table={table} />
+                    <ServerPagination
+                        meta={meta}
+                        onPageChange={handlePageChange}
+                        onLimitChange={handleLimitChange}
+                    />
                 </div>
             </div>
 

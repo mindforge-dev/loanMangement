@@ -16,6 +16,27 @@ export interface Loan {
     updated_at: string
 }
 
+export interface PaginationMeta {
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+}
+
+export interface PaginatedResponse<T> {
+    success: boolean
+    statusCode: number
+    message: string
+    data: T[]
+    meta: PaginationMeta
+    timestamp: string
+}
+
+export interface PaginationParams {
+    page?: number
+    limit?: number
+}
+
 export interface CreateLoanDto {
     borrower_id: string
     interest_rate_id: string
@@ -28,10 +49,15 @@ export interface CreateLoanDto {
 
 export type UpdateLoanDto = Partial<CreateLoanDto>
 
-// Get all loans
-export const getLoans = async (): Promise<Loan[]> => {
-    const response = await api.get<{ data: Loan[] }>('/dashboard/loans')
-    return response.data.data
+// Get all loans with pagination
+export const getLoans = async (params?: PaginationParams): Promise<PaginatedResponse<Loan>> => {
+    const response = await api.get<PaginatedResponse<Loan>>('/dashboard/loans', {
+        params: {
+            page: params?.page || 1,
+            limit: params?.limit || 10,
+        }
+    })
+    return response.data
 }
 
 // Get single loan

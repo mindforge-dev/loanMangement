@@ -7,22 +7,28 @@ import {
     updateLoan,
     deleteLoan,
 } from '../services/loanService'
-import type { Loan, CreateLoanDto, UpdateLoanDto } from '../services/loanService'
+import type {
+    Loan,
+    CreateLoanDto,
+    UpdateLoanDto,
+    PaginatedResponse,
+    PaginationParams
+} from '../services/loanService'
 
 // Query keys
 export const loanKeys = {
     all: ['loans'] as const,
     lists: () => [...loanKeys.all, 'list'] as const,
-    list: (filters: string) => [...loanKeys.lists(), { filters }] as const,
+    list: (params?: PaginationParams) => [...loanKeys.lists(), params] as const,
     details: () => [...loanKeys.all, 'detail'] as const,
     detail: (id: string) => [...loanKeys.details(), id] as const,
 }
 
-// Get all loans
-export const useLoans = (): UseQueryResult<Loan[], Error> => {
+// Get all loans with pagination
+export const useLoans = (params?: PaginationParams): UseQueryResult<PaginatedResponse<Loan>, Error> => {
     return useQuery({
-        queryKey: loanKeys.lists(),
-        queryFn: getLoans,
+        queryKey: loanKeys.list(params),
+        queryFn: () => getLoans(params),
     })
 }
 
