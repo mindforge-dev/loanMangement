@@ -39,12 +39,7 @@ echo "Building frontend from ${FRONTEND_DIR}"
 cd "${FRONTEND_DIR}"
 echo "Install path: $(pwd)"
 ls -l package.json package-lock.json 2>/dev/null || true
-if [ -f "package-lock.json" ]; then
-  npm ci --package-lock=true
-else
-  echo "package-lock.json not found, running npm install fallback"
-  npm install --package-lock=true
-fi
+npm install --include=dev
 npm run build
 
 echo "Syncing dist to ${FRONTEND_DEPLOY_DIR}"
