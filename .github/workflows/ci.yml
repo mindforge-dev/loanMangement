@@ -69,8 +69,11 @@ jobs:
             cd "$REPO_DIR"
             git fetch origin "$BRANCH"
             git checkout "$BRANCH"
-            git pull origin "$BRANCH"
+            git reset --hard "origin/$BRANCH"
             git restore --source "origin/$BRANCH" frontend/package.json frontend/package-lock.json || true
+
+            echo "Deploy commit: $(git rev-parse --short HEAD)"
+            ls -l frontend/package.json frontend/package-lock.json || true
 
             chmod +x scripts/deploy-backend.sh scripts/deploy-frontend.sh
 
