@@ -21,7 +21,12 @@ function Loans() {
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(10)
     const [selectedBorrowerId, setSelectedBorrowerId] = useState<string>('')
-
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = useState('')
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null)
     // Notification state
     const [notification, setNotification] = useState<{
         message: string
@@ -67,12 +72,7 @@ function Loans() {
         }))
     }, [rawLoans, borrowerMap])
 
-    const [sorting, setSorting] = useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [globalFilter, setGlobalFilter] = useState('')
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null)
+
 
     const handleEdit = useCallback((loan: Loan) => {
         setSelectedLoan(loan)
