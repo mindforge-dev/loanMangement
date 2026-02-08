@@ -40,15 +40,6 @@ cd "${FRONTEND_DIR}"
 echo "Install path: $(pwd)"
 ls -l package.json package-lock.json 2>/dev/null || true
 echo "npm version: $(npm -v)"
-echo "npm package-lock config: $(npm config get package-lock || true)"
-if [ -f "package-lock.json" ]; then
-  # Use npm install instead of npm ci for better compatibility across npm versions
-  rm -rf node_modules
-  npm install
-else
-  echo "package-lock.json not found; running npm install"
-  npm install
-fi
 npm run build
 
 echo "Syncing dist to ${FRONTEND_DEPLOY_DIR}"
