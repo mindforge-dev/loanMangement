@@ -12,11 +12,25 @@ import { useBorrowers, useDeleteBorrower } from '../../../hooks/useBorrowers'
 import type { Borrower } from '../../../services/borrowerService'
 import { createBorrowerColumns } from './columns'
 import ServerPagination from './ServerPagination'
+import BorrowerFormModal from './BorrowerFormModal'
+import Notification from '../../../components/Notification'
 
 function Borrowers() {
     // Pagination state
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(10)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [selectedBorrower, setSelectedBorrower] = useState<Borrower | null>(null)
+    const [notification, setNotification] = useState<{
+        message: string
+        type: 'success' | 'error' | 'info' | 'warning'
+        isVisible: boolean
+    }>({
+        message: '',
+        type: 'success',
+        isVisible: false,
+    })
 
     const { data: borrowersResponse, isLoading, error } = useBorrowers({ page, limit })
     const deleteBorrowerMutation = useDeleteBorrower()
@@ -30,8 +44,8 @@ function Borrowers() {
     const [globalFilter, setGlobalFilter] = useState('')
 
     const handleEdit = useCallback((borrower: Borrower) => {
-        console.log('Edit borrower:', borrower)
-        // TODO: Implement edit functionality
+        setSelectedBorrower(borrower)
+        setIsEditModalOpen(true)
     }, [])
 
     const handleDelete = useCallback(async (id: string) => {
@@ -45,8 +59,12 @@ function Borrowers() {
     }, [deleteBorrowerMutation])
 
     const handleAddBorrower = useCallback(() => {
-        console.log('Add new borrower')
-        // TODO: Implement add borrower functionality
+        setIsCreateModalOpen(true)
+    }, [])
+
+    const handleCloseEditModal = useCallback(() => {
+        setIsEditModalOpen(false)
+        setSelectedBorrower(null)
     }, [])
 
     const handlePageChange = useCallback((newPage: number) => {
@@ -103,26 +121,65 @@ function Borrowers() {
     }
 
     return (
-        <div className="space-y-6">
-            <TableToolbar
-                table={table}
-                globalFilter={globalFilter}
-                setGlobalFilter={setGlobalFilter}
-                title="Borrowers"
-                description="Manage borrower information"
-                addButtonText="+ Add Borrower"
-                onAddClick={handleAddBorrower}
-            />
-
-            <div>
-                <DataTable table={table} />
-                <ServerPagination
-                    meta={meta}
-                    onPageChange={handlePageChange}
-                    onLimitChange={handleLimitChange}
+        <>
+            <div className="space-y-6">
+                <TableToolbar
+                    table={table}
+                    globalFilter={globalFilter}
+                    setGlobalFilter={setGlobalFilter}
+                    title="Borrowers"
+                    description="Manage borrower information"
+                    addButtonText="+ Add Borrower"
+                    onAddClick={handleAddBorrower}
                 />
+
+                <div>
+                    <DataTable table={table} />
+                    <ServerPagination
+                        meta={meta}
+                        onPageChange={handlePageChange}
+                        onLimitChange={handleLimitChange}
+                    />
+                </div>
             </div>
-        </div>
+
+            {isCreateModalOpen && (
+                <BorrowerFormModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSuccess={(mode) => {
+                        setNotification({
+                            message: mode === 'create' ? 'Borrower created successfully!' : 'Borrower updated successfully!',
+                            type: 'success',
+                            isVisible: true,
+                        })
+                    }}
+                />
+            )}
+
+            {isEditModalOpen && (
+                <BorrowerFormModal
+                    isOpen={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    mode="edit"
+                    initialData={selectedBorrower}
+                    onSuccess={(mode) => {
+                        setNotification({
+                            message: mode === 'create' ? 'Borrower created successfully!' : 'Borrower updated successfully!',
+                            type: 'success',
+                            isVisible: true,
+                        })
+                    }}
+                />
+            )}
+
+            <Notification
+                message={notification.message}
+                type={notification.type}
+                isVisible={notification.isVisible}
+                onClose={() => setNotification({ ...notification, isVisible: false })}
+            />
+        </>
     )
 }
 
