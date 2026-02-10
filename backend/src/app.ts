@@ -9,21 +9,23 @@ import interestRateRoutes from "./modules/interest-rates/interest-rates.routes";
 import loanRoutes from "./modules/loans/loans.routes";
 import transactionRoutes from "./modules/transactions/transactions.route";
 import contractRoutes from "./modules/contracts/contracts.routes";
-
+import type { Request, Response } from "express";
 export const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://www.zcoder.space",
-    "https://zcoder.space",
-    "http://localhost:5173",
-    "https://loanmanagement.zcoder.space"
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://www.zcoder.space",
+      "https://zcoder.space",
+      "http://localhost:5173",
+      "https://loanmanagement.zcoder.space",
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,7 +39,7 @@ app.use("/api/dashboard/transactions", transactionRoutes);
 app.use("/api/dashboard/contracts", contractRoutes);
 
 // Root Endpoint
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Loan Management API is running" });
 });
 
