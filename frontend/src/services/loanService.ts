@@ -41,6 +41,22 @@ export interface PaginatedResponse<T> {
 export interface PaginationParams {
   page?: number;
   limit?: number;
+  status?: string;
+  status_in?: string;
+  loan_type?: string;
+  loan_type_in?: string;
+  borrower_full_name?: string;
+  interest_rate_id?: string;
+  principal_amount_gte?: number;
+  principal_amount_lte?: number;
+  current_balance_gte?: number;
+  current_balance_lte?: number;
+  term_months_gte?: number;
+  term_months_lte?: number;
+  start_date_gte?: string;
+  start_date_lte?: string;
+  end_date_gte?: string;
+  end_date_lte?: string;
 }
 
 export interface CreateLoanDto {
@@ -65,12 +81,13 @@ export const getLoansByBorrower = async (
   return response.data;
 };
 
-// Get all loans with pagination
+// Get all loans with pagination and filters
 export const getLoans = async (
   params?: PaginationParams,
 ): Promise<PaginatedResponse<Loan>> => {
   const response = await api.get<PaginatedResponse<Loan>>("/dashboard/loans", {
     params: {
+      ...params,
       page: params?.page || 1,
       limit: params?.limit || 10,
     },
