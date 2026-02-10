@@ -7,11 +7,16 @@ export class LoanRepository extends BaseRepository<Loan> {
     super(AppDataSource.getRepository(Loan));
   }
 
-  async findByBorrower(borrowerId: string): Promise<Loan[]> {
-    return this.repo.find({
-      where: { borrower_id: borrowerId },
-      relations: ["borrower", "interest_rate"],
-    });
+  async findByBorrowerName(borrowerName: string): Promise<Loan[]> {
+    return this.repo
+      .createQueryBuilder("loan")
+      .leftJoinAndSelect("loan.borrower", "borrower")
+      .leftJoinAndSelect("loan.interest_rate", "interest_rate")
+      .where("LOWER(borrower.full_name) LIKE LOWER(:borrowerName)", {
+        borrowerName: `%${borrowerName}%`,
+      })
+      .orderBy("loan.created_at", "DESC")
+      .getMany();
   }
 
   async findByIdWithRelations(id: string): Promise<Loan | null> {

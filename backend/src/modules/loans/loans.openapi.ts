@@ -67,7 +67,7 @@ export const registerLoanDocs = () => {
     method: "get",
     path: "/dashboard/loans",
     tags: ["Loans"],
-    summary: "Get loans (paginated)",
+    summary: "Get loans (paginated + filterable)",
     security: [{ bearerAuth: [] }],
     parameters: [
       {
@@ -81,6 +81,105 @@ export const registerLoanDocs = () => {
         in: "query",
         required: false,
         schema: { type: "integer", minimum: 1, maximum: 100, default: 10 },
+      },
+      {
+        name: "status",
+        in: "query",
+        required: false,
+        schema: { type: "string", enum: Object.values(LoanStatus) },
+      },
+      {
+        name: "status_in",
+        in: "query",
+        required: false,
+        description: "Comma-separated statuses (e.g. ACTIVE,COMPLETED)",
+        schema: { type: "string" },
+      },
+      {
+        name: "loan_type",
+        in: "query",
+        required: false,
+        schema: { type: "string", enum: Object.values(LoanType) },
+      },
+      {
+        name: "loan_type_in",
+        in: "query",
+        required: false,
+        description: "Comma-separated loan types (e.g. PERSONAL,HOME)",
+        schema: { type: "string" },
+      },
+      {
+        name: "borrower_full_name",
+        in: "query",
+        required: false,
+        description: "Partial match on borrower full name",
+        schema: { type: "string" },
+      },
+      {
+        name: "interest_rate_id",
+        in: "query",
+        required: false,
+        schema: { type: "string", format: "uuid" },
+      },
+      {
+        name: "principal_amount_gte",
+        in: "query",
+        required: false,
+        schema: { type: "number" },
+      },
+      {
+        name: "principal_amount_lte",
+        in: "query",
+        required: false,
+        schema: { type: "number" },
+      },
+      {
+        name: "current_balance_gte",
+        in: "query",
+        required: false,
+        schema: { type: "number" },
+      },
+      {
+        name: "current_balance_lte",
+        in: "query",
+        required: false,
+        schema: { type: "number" },
+      },
+      {
+        name: "term_months_gte",
+        in: "query",
+        required: false,
+        schema: { type: "integer" },
+      },
+      {
+        name: "term_months_lte",
+        in: "query",
+        required: false,
+        schema: { type: "integer" },
+      },
+      {
+        name: "start_date_gte",
+        in: "query",
+        required: false,
+        schema: { type: "string", format: "date" },
+      },
+      {
+        name: "start_date_lte",
+        in: "query",
+        required: false,
+        schema: { type: "string", format: "date" },
+      },
+      {
+        name: "end_date_gte",
+        in: "query",
+        required: false,
+        schema: { type: "string", format: "date" },
+      },
+      {
+        name: "end_date_lte",
+        in: "query",
+        required: false,
+        schema: { type: "string", format: "date" },
       },
     ],
     responses: {
@@ -96,6 +195,32 @@ export const registerLoanDocs = () => {
               meta: PaginationMetaSchema,
               timestamp: z.string(),
             }),
+          },
+        },
+      },
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/dashboard/loans/borrower/{borrowerName}",
+    tags: ["Loans"],
+    summary: "Get loans by borrower name",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "borrowerName",
+        in: "path",
+        required: true,
+        schema: { type: "string" },
+      },
+    ],
+    responses: {
+      200: {
+        description: "Loan list filtered by borrower name",
+        content: {
+          "application/json": {
+            schema: z.object({ data: z.array(LoanResponseSchema) }),
           },
         },
       },

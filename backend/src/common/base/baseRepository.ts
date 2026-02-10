@@ -21,14 +21,22 @@ export class BaseRepository<T extends ObjectLiteral> {
         pagination: PaginationParams,
     ): Promise<PaginatedResult<T>> {
         const { page, limit } = pagination;
-        const [data, total] = await this.repo.findAndCount({
+        let [data, total] = await this.repo.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
         });
+        const effectivePage = PaginationCore.clampPage(page, total, limit);
+
+        if (effectivePage !== page) {
+            [data, total] = await this.repo.findAndCount({
+                skip: (effectivePage - 1) * limit,
+                take: limit,
+            });
+        }
 
         return {
             data,
-            meta: PaginationCore.buildMeta(total, page, limit),
+            meta: PaginationCore.buildMeta(total, effectivePage, limit),
         };
     }
 

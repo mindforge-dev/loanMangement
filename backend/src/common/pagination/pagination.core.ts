@@ -30,8 +30,16 @@ export class PaginationCore {
       total,
       page,
       limit,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
+      totalPages: this.getTotalPages(total, limit),
     };
+  }
+
+  static getTotalPages(total: number, limit: number): number {
+    return Math.max(1, Math.ceil(total / limit));
+  }
+
+  static clampPage(page: number, total: number, limit: number): number {
+    return Math.min(page, this.getTotalPages(total, limit));
   }
 
   private static toPositiveInteger(value: unknown, fallback: number): number {
