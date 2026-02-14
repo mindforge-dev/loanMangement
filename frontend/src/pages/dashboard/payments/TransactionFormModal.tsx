@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useEffect } from "react";
 import { useBorrowers } from "../../../hooks/useBorrowers";
 import { useLoansByBorrower } from "../../../hooks/useLoans";
-import { useCreateTransaction } from "../../../hooks/useTransactions";
-import type { CreateTransactionDto } from "../../../services/transactionService";
+import {
+  useTransactionForm,
+  type CreateTransactionDto,
+} from "./useTransactionForm";
 
 interface TransactionFormModalProps {
   isOpen: boolean;
@@ -10,44 +12,26 @@ interface TransactionFormModalProps {
   onSuccess?: () => void;
 }
 
-type FormData = {
-  loan_id: string;
-  payment_date: string;
-  borrower_id: string;
-  type: CreateTransactionDto["type"];
-  amount_paid: string;
-  remaining_balance: string;
-  payment_term_months: string;
-  method: string;
-  note: string;
-};
-
-type FormErrors = Partial<Record<keyof FormData, string>>;
-
-const initialFormData: FormData = {
-  loan_id: "",
-  payment_date: "",
-  borrower_id: "",
-  type: "REPAYMENT",
-  amount_paid: "",
-  remaining_balance: "",
-  payment_term_months: "",
-  method: "",
-  note: "",
-};
-
 export default function TransactionFormModal({
   isOpen,
   onClose,
   onSuccess,
 }: TransactionFormModalProps) {
-  const createTransactionMutation = useCreateTransaction();
-  const { data: borrowersResponse, isLoading: borrowersLoading } = useBorrowers(
-    { page: 1, limit: 1000 },
-  );
+  const {
+    formData,
+    errors,
+    updateField,
+    setLoanId,
+    handleSubmit,
+    resetAndClose,
+    isSubmitting,
+    isError,
+  } = useTransactionForm({ onClose, onSuccess });
 
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const { data: borrowersResponse, isLoading: borrowersLoading } = useBorrowers({
+    page: 1,
+    limit: 1000,
+  });
 
   const { data: loansByBorrowerResponse, isLoading: loansLoading } =
     useLoansByBorrower(formData.borrower_id);
@@ -70,97 +54,11 @@ export default function TransactionFormModal({
   }, [borrowers]);
 
   // Auto-select if only one loan
-  const [prevLoans, setPrevLoans] = useState(loans);
-  if (loans !== prevLoans) {
-    setPrevLoans(loans);
+  useEffect(() => {
     if (loans.length === 1 && !formData.loan_id) {
-      setFormData((prev) => ({ ...prev, loan_id: loans[0].id }));
+      setLoanId(loans[0].id);
     }
-  }
-
-  const updateField = (field: keyof FormData, value: string) => {
-    console.log(field, value);
-    setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      if (field === "borrower_id") {
-        updated.loan_id = "";
-      }
-      return updated;
-    });
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const resetAndClose = () => {
-    setFormData(initialFormData);
-    setErrors({});
-    onClose();
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.loan_id) newErrors.loan_id = "Loan is required";
-    if (!formData.borrower_id) newErrors.borrower_id = "Borrower is required";
-    if (!formData.payment_date)
-      newErrors.payment_date = "Payment date is required";
-    if (!formData.method.trim()) newErrors.method = "Method is required";
-
-    const amountPaid = Number(formData.amount_paid);
-    if (!formData.amount_paid || Number.isNaN(amountPaid) || amountPaid < 0) {
-      newErrors.amount_paid = "Amount paid must be a valid number (>= 0)";
-    }
-
-    const remainingBalance = Number(formData.remaining_balance);
-    if (
-      !formData.remaining_balance ||
-      Number.isNaN(remainingBalance) ||
-      remainingBalance < 0
-    ) {
-      newErrors.remaining_balance =
-        "Remaining balance must be a valid number (>= 0)";
-    }
-
-    const termMonths = Number(formData.payment_term_months);
-    if (
-      !formData.payment_term_months ||
-      !Number.isInteger(termMonths) ||
-      termMonths < 1
-    ) {
-      newErrors.payment_term_months =
-        "Payment term must be a whole number (>= 1)";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    const payload: CreateTransactionDto = {
-      loan_id: formData.loan_id,
-      payment_date: formData.payment_date,
-      borrower_id: formData.borrower_id,
-      type: formData.type,
-      amount_paid: Number(formData.amount_paid),
-      remaining_balance: Number(formData.remaining_balance),
-      payment_term_months: Number(formData.payment_term_months),
-      method: formData.method.trim(),
-      note: formData.note.trim() || undefined,
-    };
-
-    try {
-      await createTransactionMutation.mutateAsync(payload);
-      resetAndClose();
-      onSuccess?.();
-    } catch (error) {
-      console.error("Failed to create transaction:", error);
-    }
-  };
+  }, [loans, formData.loan_id, setLoanId]);
 
   if (!isOpen) return null;
 
@@ -189,7 +87,7 @@ export default function TransactionFormModal({
               <button
                 onClick={resetAndClose}
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                disabled={createTransactionMutation.isPending}
+                disabled={isSubmitting}
               >
                 <svg
                   className="w-6 h-6 text-gray-400"
@@ -424,7 +322,7 @@ export default function TransactionFormModal({
               </div>
             </div>
 
-            {createTransactionMutation.isError && (
+            {isError && (
               <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600">
                   Failed to create transaction. Please try again.
@@ -436,17 +334,17 @@ export default function TransactionFormModal({
               <button
                 type="button"
                 onClick={resetAndClose}
-                disabled={createTransactionMutation.isPending}
+                disabled={isSubmitting}
                 className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={createTransactionMutation.isPending}
+                disabled={isSubmitting}
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {createTransactionMutation.isPending ? (
+                {isSubmitting ? (
                   <>
                     <svg
                       className="animate-spin h-5 w-5"
