@@ -228,6 +228,32 @@ export const registerLoanDocs = () => {
 
   registry.registerPath({
     method: "get",
+    path: "/dashboard/loans/borrower/id/{borrowerId}",
+    tags: ["Loans"],
+    summary: "Get loans by borrower ID",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "borrowerId",
+        in: "path",
+        required: true,
+        schema: { type: "string", format: "uuid" },
+      },
+    ],
+    responses: {
+      200: {
+        description: "Loan list filtered by borrower ID",
+        content: {
+          "application/json": {
+            schema: z.object({ data: z.array(LoanResponseSchema) }),
+          },
+        },
+      },
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
     path: "/dashboard/loans/{id}",
     tags: ["Loans"],
     summary: "Get loan by ID",

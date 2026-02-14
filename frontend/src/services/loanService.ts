@@ -76,7 +76,7 @@ export const getLoansByBorrower = async (
   borrowerId: string,
 ): Promise<{ data: Loan[] }> => {
   const response = await api.get<{ data: Loan[] }>(
-    `/dashboard/loans/borrower/${borrowerId}`,
+    `/dashboard/loans/borrower/id/${borrowerId}`,
   );
   return response.data;
 };

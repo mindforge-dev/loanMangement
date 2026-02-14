@@ -28,45 +28,45 @@ export class LoanService implements ICrudService<Loan> {
     | "start_date"
     | "end_date"
   > = {
-    status: { column: "status", type: "string", operators: ["eq", "in"] },
-    loan_type: { column: "loan_type", type: "string", operators: ["eq", "in"] },
-    borrower_full_name: {
-      column: "borrower.full_name",
-      type: "string",
-      operators: ["eq"],
-      matchMode: "contains",
-    },
-    interest_rate_id: {
-      column: "interest_rate_id",
-      type: "string",
-      operators: ["eq"],
-    },
-    principal_amount: {
-      column: "principal_amount",
-      type: "number",
-      operators: ["eq", "gte", "lte"],
-    },
-    current_balance: {
-      column: "current_balance",
-      type: "number",
-      operators: ["eq", "gte", "lte"],
-    },
-    term_months: {
-      column: "term_months",
-      type: "number",
-      operators: ["eq", "gte", "lte"],
-    },
-    start_date: {
-      column: "start_date",
-      type: "date",
-      operators: ["eq", "gte", "lte"],
-    },
-    end_date: {
-      column: "end_date",
-      type: "date",
-      operators: ["eq", "gte", "lte"],
-    },
-  };
+      status: { column: "status", type: "string", operators: ["eq", "in"] },
+      loan_type: { column: "loan_type", type: "string", operators: ["eq", "in"] },
+      borrower_full_name: {
+        column: "borrower.full_name",
+        type: "string",
+        operators: ["eq"],
+        matchMode: "contains",
+      },
+      interest_rate_id: {
+        column: "interest_rate_id",
+        type: "string",
+        operators: ["eq"],
+      },
+      principal_amount: {
+        column: "principal_amount",
+        type: "number",
+        operators: ["eq", "gte", "lte"],
+      },
+      current_balance: {
+        column: "current_balance",
+        type: "number",
+        operators: ["eq", "gte", "lte"],
+      },
+      term_months: {
+        column: "term_months",
+        type: "number",
+        operators: ["eq", "gte", "lte"],
+      },
+      start_date: {
+        column: "start_date",
+        type: "date",
+        operators: ["eq", "gte", "lte"],
+      },
+      end_date: {
+        column: "end_date",
+        type: "date",
+        operators: ["eq", "gte", "lte"],
+      },
+    };
 
   constructor(
     loanRepo: LoanRepository = loanRepository,
@@ -210,6 +210,10 @@ export class LoanService implements ICrudService<Loan> {
 
   async findByBorrowerName(borrowerName: string): Promise<Loan[]> {
     return this.loanRepo.findByBorrowerName(borrowerName);
+  }
+
+  async findByBorrowerId(borrowerId: string): Promise<Loan[]> {
+    return this.loanRepo.findByBorrowerId(borrowerId);
   }
 }
 

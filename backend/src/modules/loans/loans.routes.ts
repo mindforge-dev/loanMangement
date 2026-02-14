@@ -19,8 +19,13 @@ router.post(
   loanController.create,
 );
 router.get("/", authenticate, loanController.findAll);
-router.get("/:id", authenticate, loanController.findById);
 router.get("/borrower/:borrowerName", authenticate, loanController.getByBorrower);
+router.get(
+  "/borrower/id/:borrowerId",
+  authenticate,
+  loanController.getByBorrowerId,
+);
+router.get("/:id", authenticate, loanController.findById);
 router.put(
   "/:id",
   authenticate,

@@ -79,6 +79,7 @@ export default function TransactionFormModal({
   }
 
   const updateField = (field: keyof FormData, value: string) => {
+    console.log(field, value);
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
       if (field === "borrower_id") {

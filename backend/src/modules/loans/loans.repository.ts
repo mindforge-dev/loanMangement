@@ -19,6 +19,14 @@ export class LoanRepository extends BaseRepository<Loan> {
       .getMany();
   }
 
+  async findByBorrowerId(borrowerId: string): Promise<Loan[]> {
+    return this.repo.find({
+      where: { borrower_id: borrowerId } as any,
+      relations: ["borrower", "interest_rate"],
+      order: { created_at: "DESC" },
+    });
+  }
+
   async findByIdWithRelations(id: string): Promise<Loan | null> {
     return this.repo.findOne({
       where: { id } as any,
