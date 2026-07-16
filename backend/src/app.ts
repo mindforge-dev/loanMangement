@@ -12,17 +12,25 @@ import contractRoutes from "./modules/contracts/contracts.routes";
 import type { Request, Response } from "express";
 export const app = express();
 
+import { env } from "./config/env";
+
 // Middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin: [
+
+const allowedOrigins = env.CORS_ORIGINS
+  ? env.CORS_ORIGINS.split(",").map((o) => o.trim())
+  : [
       "http://localhost:3000",
       "https://www.zcoder.space",
       "https://zcoder.space",
       "http://localhost:5173",
+      "http://localhost:4173",
       "https://loanmanagement.zcoder.space",
-    ],
+    ];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
     credentials: true,
   }),
 );

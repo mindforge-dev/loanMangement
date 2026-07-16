@@ -25,6 +25,7 @@ const envSchema = z.object({
     AWS_S3_BUCKET: z.string().default('loan-contracts'),
     // Override endpoint for local MinIO. Leave unset in production to use real AWS.
     AWS_S3_ENDPOINT: z.string().optional(),
+    CORS_ORIGINS: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);
