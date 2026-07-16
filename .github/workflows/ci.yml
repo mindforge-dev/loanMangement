@@ -68,7 +68,7 @@ jobs:
     needs: [build-frontend, build-backend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - name: Debug Environment Secrets
+       - name: Debug Environment Secrets
         run: |
           echo "Checking if environment secrets are present..."
           echo "VPS_HOST is set: ${{ secrets.VPS_HOST != '' }}"
@@ -81,6 +81,19 @@ jobs:
           echo "VPS_FRONTEND_DIST_PATH is set: ${{ secrets.VPS_FRONTEND_DIST_PATH != '' }}"
           echo "VPS_FRONTEND_WEB_ROOT is set: ${{ secrets.VPS_FRONTEND_WEB_ROOT != '' }}"
           echo "VPS_FRONTEND_PM2_NAME is set: ${{ secrets.VPS_FRONTEND_PM2_NAME != '' }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy scripts to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: scripts/
+          target: ${{ secrets.VPS_PROJECT_PATH }}
 
       - name: Download frontend dist
         uses: actions/download-artifact@v4
@@ -124,11 +137,8 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            # Update repository scripts on the VPS first
             PROJECT_PATH=$(echo "${{ secrets.VPS_PROJECT_PATH }}" | xargs)
             cd "$PROJECT_PATH"
-            git fetch origin main
-            git reset --hard origin/main
 
             # Deploy backend (install prod deps + restart pm2 app)
             export APP_DIR=$(echo "${{ secrets.VPS_BACKEND_APP_PATH }}" | xargs)
