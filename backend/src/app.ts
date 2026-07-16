@@ -9,6 +9,7 @@ import interestRateRoutes from "./modules/interest-rates/interest-rates.routes";
 import loanRoutes from "./modules/loans/loans.routes";
 import transactionRoutes from "./modules/transactions/transactions.route";
 import contractRoutes from "./modules/contracts/contracts.routes";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import type { Request, Response } from "express";
 export const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/dashboard/interest-rates", interestRateRoutes);
 app.use("/api/dashboard/loans", loanRoutes);
 app.use("/api/dashboard/transactions", transactionRoutes);
 app.use("/api/dashboard/contracts", contractRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Root Endpoint
 app.get("/", (req: Request, res: Response) => {
