@@ -28,7 +28,7 @@ function Users() {
   }, []);
 
   const handleDelete = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       if (confirm("Are you sure you want to delete this user?")) {
         try {
           await deleteUserMutation.mutateAsync(id);
@@ -61,25 +61,27 @@ function Users() {
           <div className="text-sm text-gray-600">{info.getValue()}</div>
         ),
       }),
-      columnHelper.accessor("role", {
-        header: "Role",
+      columnHelper.accessor("roles", {
+        header: "Roles",
         cell: (info) => (
-          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-            {info.getValue()}
-          </span>
+          <div className="flex flex-wrap gap-1">
+            {(info.getValue() ?? []).map((role: string) => (
+              <span
+                key={role}
+                className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+              >
+                {role}
+              </span>
+            ))}
+          </div>
         ),
       }),
-      columnHelper.accessor("status", {
+      columnHelper.display({
+        id: "status",
         header: "Status",
-        cell: (info) => (
-          <span
-            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-              info.getValue() === "Active"
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {info.getValue()}
+        cell: () => (
+          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            Active
           </span>
         ),
       }),

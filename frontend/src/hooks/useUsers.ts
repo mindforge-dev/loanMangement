@@ -3,19 +3,18 @@ import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query'
 import {
     getUsers,
     getUser,
-    createUser,
-    updateUser,
     deleteUser,
+    assignRoles,
+    syncPermissions,
 } from '../services/userService'
-import type { User, CreateUserDto, UpdateUserDto } from '../services/userService'
+import type { User } from '../services/userService'
 
 // Query keys
 export const userKeys = {
     all: ['users'] as const,
     lists: () => [...userKeys.all, 'list'] as const,
-    list: (filters: string) => [...userKeys.lists(), { filters }] as const,
     details: () => [...userKeys.all, 'detail'] as const,
-    detail: (id: number) => [...userKeys.details(), id] as const,
+    detail: (id: string) => [...userKeys.details(), id] as const,
 }
 
 // Get all users
@@ -27,7 +26,7 @@ export const useUsers = (): UseQueryResult<User[], Error> => {
 }
 
 // Get single user
-export const useUser = (id: number): UseQueryResult<User, Error> => {
+export const useUser = (id: string): UseQueryResult<User, Error> => {
     return useQuery({
         queryKey: userKeys.detail(id),
         queryFn: () => getUser(id),
@@ -35,28 +34,28 @@ export const useUser = (id: number): UseQueryResult<User, Error> => {
     })
 }
 
-// Create user mutation
-export const useCreateUser = (): UseMutationResult<User, Error, CreateUserDto> => {
+// Delete user mutation
+export const useDeleteUser = (): UseMutationResult<void, Error, string> => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: createUser,
+        mutationFn: deleteUser,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() })
         },
     })
 }
 
-// Update user mutation
-export const useUpdateUser = (): UseMutationResult<
+// Assign (sync) roles
+export const useAssignRoles = (): UseMutationResult<
     User,
     Error,
-    { id: number; data: UpdateUserDto }
+    { id: string; roles: string[] }
 > => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }) => updateUser(id, data),
+        mutationFn: ({ id, roles }) => assignRoles(id, roles),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() })
             queryClient.invalidateQueries({ queryKey: userKeys.detail(data.id) })
@@ -64,14 +63,19 @@ export const useUpdateUser = (): UseMutationResult<
     })
 }
 
-// Delete user mutation
-export const useDeleteUser = (): UseMutationResult<void, Error, number> => {
+// Sync direct permissions
+export const useSyncPermissions = (): UseMutationResult<
+    User,
+    Error,
+    { id: string; permissions: string[] }
+> => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: deleteUser,
-        onSuccess: () => {
+        mutationFn: ({ id, permissions }) => syncPermissions(id, permissions),
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+            queryClient.invalidateQueries({ queryKey: userKeys.detail(data.id) })
         },
     })
 }

@@ -1,6 +1,9 @@
 
 
+import { useAuth } from '../../../hooks/useAuth'
+
 function Dashboard() {
+    const { user } = useAuth()
     const stats = [
         { name: 'Total Loans', value: '1,234', change: '+12.5%', positive: true },
         { name: 'Active Users', value: '567', change: '+8.2%', positive: true },
@@ -12,7 +15,7 @@ function Dashboard() {
         <div className="space-y-6">
             {/* Welcome section */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-8 text-white">
-                <h1 className="text-3xl font-bold mb-2">Welcome back, Admin!</h1>
+                <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name || 'User'}!</h1>
                 <p className="text-indigo-100">Here's what's happening with your loan management system today.</p>
             </div>
 

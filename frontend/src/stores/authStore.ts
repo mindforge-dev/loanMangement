@@ -1,19 +1,22 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-interface User {
+export interface User {
     id: string
     name: string
     email: string
-    role: string
+    roles: string[]
+    permissions: string[]
     createdAt?: string
 }
 
 interface AuthState {
     user: User | null
-    token: string | null
+    accessToken: string | null
+    refreshToken: string | null
     isAuthenticated: boolean
-    login: (userData: User, token: string) => void
+    login: (user: User, accessToken: string, refreshToken: string) => void
+    setTokens: (accessToken: string, refreshToken: string) => void
     logout: () => void
 }
 
@@ -21,14 +24,26 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             user: null,
-            token: null,
+            accessToken: null,
+            refreshToken: null,
             isAuthenticated: false,
-            login: (user, token) => set({ user, token, isAuthenticated: true }),
-            logout: () => set({ user: null, token: null, isAuthenticated: false }),
+            login: (user, accessToken, refreshToken) =>
+                set({ user, accessToken, refreshToken, isAuthenticated: true }),
+            setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+            logout: () =>
+                set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
         }),
         {
-            name: 'auth-storage', // name of item in localStorage
+            name: 'auth-storage',
+            version: 2, // bumped: shape changed (token -> accessToken/refreshToken, role -> roles[])
             storage: createJSONStorage(() => localStorage),
-        }
-    )
+            // Discard any persisted state from an older (incompatible) version.
+            migrate: () => ({
+                user: null,
+                accessToken: null,
+                refreshToken: null,
+                isAuthenticated: false,
+            }),
+        },
+    ),
 )

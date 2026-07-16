@@ -13,13 +13,23 @@ import {
     BellIcon,
     UserCircleIcon
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../hooks/useAuth'
-const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Users', href: '/users', icon: UsersIcon },
-    { name: 'Loans', href: '/loans', icon: DocumentTextIcon },
-    { name: 'Borrowers', href: '/borrowers', icon: UserGroupIcon },
-    { name: 'Payments', href: '/payments', icon: CreditCardIcon },
+import { useAuth, useLogout } from '../hooks/useAuth'
+import { Permissions, hasPermission } from '../lib/permissions'
+import { useAuthStore } from '../stores/authStore'
+
+type NavItem = {
+    name: string
+    href: string
+    icon: typeof HomeIcon
+    permission?: string
+}
+
+const navigation: NavItem[] = [
+    { name: 'Dashboard', href: '/', icon: HomeIcon, permission: Permissions.DASHBOARD_VIEW },
+    { name: 'Users', href: '/users', icon: UsersIcon, permission: Permissions.USERS_VIEW },
+    { name: 'Loans', href: '/loans', icon: DocumentTextIcon, permission: Permissions.LOANS_VIEW },
+    { name: 'Borrowers', href: '/borrowers', icon: UserGroupIcon, permission: Permissions.BORROWERS_VIEW },
+    { name: 'Payments', href: '/payments', icon: CreditCardIcon, permission: Permissions.TRANSACTIONS_VIEW },
     { name: 'Reports', href: '/reports', icon: ChartBarIcon },
     { name: 'Settings', href: '/settings', icon: CogIcon },
 ]
@@ -27,7 +37,13 @@ const navigation = [
 function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const location = useLocation()
-    const { user, logout } = useAuth()
+    const { user } = useAuth()
+    const logoutMutation = useLogout()
+    const currentUser = useAuthStore((state) => state.user)
+
+    const visibleNav = navigation.filter(
+        (item) => !item.permission || hasPermission(currentUser, item.permission),
+    )
 
     const isActive = (path: string) => {
         return location.pathname === path
@@ -65,7 +81,7 @@ function DashboardLayout() {
 
                     {/* Navigation */}
                     <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-                        {navigation.map((item) => {
+                        {visibleNav.map((item) => {
                             const Icon = item.icon
                             const active = isActive(item.href)
                             return (
@@ -114,9 +130,9 @@ function DashboardLayout() {
                         </button>
 
                         <div className="flex-1 flex justify-center lg:justify-start">
-                            <h2 className="text-xl font-semibold text-gray-800">
-                                {navigation.find(item => isActive(item.href))?.name || 'Dashboard'}
-                            </h2>
+                        <h2 className="text-xl font-semibold text-gray-800">
+                            {visibleNav.find(item => isActive(item.href))?.name || 'Dashboard'}
+                        </h2>
                         </div>
 
                         <div className="flex items-center space-x-4">
@@ -132,10 +148,11 @@ function DashboardLayout() {
                                     <UserCircleIcon className="h-8 w-8 text-gray-500" />
                                 </button>
                                 <button
-                                    onClick={() => logout()}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    onClick={() => logoutMutation.mutate()}
+                                    disabled={logoutMutation.isPending}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                 >
-                                    Logout
+                                    {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
                                 </button>
                             </div>
                         </div>

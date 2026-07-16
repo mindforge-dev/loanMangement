@@ -1,8 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
 import type { UseMutationResult } from '@tanstack/react-query'
-import { login, register, logout as logoutApi } from '../services/authService'
+import {
+    login,
+    register,
+    logout as logoutApi,
+} from '../services/authService'
 import type { LoginCredentials, AuthResponse, RegisterData } from '../services/authService'
 import { useAuthStore } from '../stores/authStore'
+import { hasPermission, isSuperAdmin } from '../lib/permissions'
 
 // Login mutation
 export const useLogin = (): UseMutationResult<AuthResponse, Error, LoginCredentials> => {
@@ -11,7 +16,7 @@ export const useLogin = (): UseMutationResult<AuthResponse, Error, LoginCredenti
     return useMutation({
         mutationFn: login,
         onSuccess: (data) => {
-            loginStore(data.user, data.token)
+            loginStore(data.user, data.accessToken, data.refreshToken)
             window.location.href = '/'
         },
     })
@@ -24,21 +29,22 @@ export const useRegister = (): UseMutationResult<AuthResponse, Error, RegisterDa
     return useMutation({
         mutationFn: register,
         onSuccess: (data) => {
-            loginStore(data.user, data.token)
+            loginStore(data.user, data.accessToken, data.refreshToken)
             window.location.href = '/'
         },
     })
 }
 
-// Logout mutation
+// Logout mutation — invalidates the refresh token server-side, then clears state
 export const useLogout = () => {
     const logoutStore = useAuthStore((state) => state.logout)
 
     return useMutation({
         mutationFn: async () => {
-            await logoutApi()
+            const { refreshToken } = useAuthStore.getState()
+            await logoutApi(refreshToken)
         },
-        onSuccess: () => {
+        onSettled: () => {
             logoutStore()
             window.location.href = '/login'
         },
@@ -47,12 +53,29 @@ export const useLogout = () => {
 
 // Get current auth state
 export const useAuth = () => {
-    const { user, isAuthenticated, logout } = useAuthStore()
+    const { user, isAuthenticated } = useAuthStore()
 
     return {
         user,
         isAuthenticated,
-        logout,
         isLoading: false,
     }
+}
+
+// ── Permission helpers ──
+
+export const useHasPermission = (permission: string): boolean => {
+    return useAuthStore((state) => hasPermission(state.user, permission))
+}
+
+export const useHasAnyPermission = (permissions: string[]): boolean => {
+    return useAuthStore((state) =>
+        permissions.length === 0
+            ? true
+            : isSuperAdmin(state.user) || permissions.some((p) => state.user?.permissions.includes(p)),
+    )
+}
+
+export const useIsSuperAdmin = (): boolean => {
+    return useAuthStore((state) => isSuperAdmin(state.user))
 }

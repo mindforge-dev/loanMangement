@@ -11,6 +11,7 @@ import {
   Reports,
   Settings
 } from './pages/dashboard'
+import { Permissions } from './lib/permissions'
 
 function App() {
   return (
@@ -24,16 +25,44 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredPermission={Permissions.DASHBOARD_VIEW}>
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
           <Route index element={<Dashboard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="loans" element={<Loans />} />
-          <Route path="borrowers" element={<Borrowers />} />
-          <Route path="payments" element={<Payments />} />
+          <Route
+            path="users"
+            element={
+              <ProtectedRoute requiredPermission={Permissions.USERS_VIEW}>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="loans"
+            element={
+              <ProtectedRoute requiredPermission={Permissions.LOANS_VIEW}>
+                <Loans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="borrowers"
+            element={
+              <ProtectedRoute requiredPermission={Permissions.BORROWERS_VIEW}>
+                <Borrowers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="payments"
+            element={
+              <ProtectedRoute requiredPermission={Permissions.TRANSACTIONS_VIEW}>
+                <Payments />
+              </ProtectedRoute>
+            }
+          />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
         </Route>
