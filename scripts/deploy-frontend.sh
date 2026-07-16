@@ -8,8 +8,8 @@ WEB_ROOT="${WEB_ROOT:?WEB_ROOT is required, e.g. /var/www/loan-management}"
 PM2_NAME="${PM2_NAME:-}"
 
 echo "Syncing $DIST_DIR → $WEB_ROOT..."
-mkdir -p "$WEB_ROOT"
-rsync -a --delete "$DIST_DIR/" "$WEB_ROOT/"
+sudo mkdir -p "$WEB_ROOT"
+sudo rsync -a --delete "$DIST_DIR/" "$WEB_ROOT/"
 
 if [ -n "$PM2_NAME" ]; then
   echo "Reloading $PM2_NAME via pm2..."

@@ -10,6 +10,11 @@ echo "Installing production dependencies..."
 cd "$APP_DIR"
 npm ci --omit=dev
 
+if [ ! -f "global-bundle.pem" ]; then
+  echo "Downloading AWS RDS CA bundle..."
+  curl -sS -o global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+fi
+
 echo "Restarting $PM2_NAME via pm2..."
 pm2 reload "$PM2_NAME" || pm2 restart "$PM2_NAME" || pm2 start dist/server.js --name "$PM2_NAME"
 
