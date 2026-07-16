@@ -70,6 +70,20 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: loan_management
     steps:
+      - name: Debug Environment Secrets
+        run: |
+          echo "Checking if environment secrets are present..."
+          echo "VPS_HOST is set: ${{ secrets.VPS_HOST != '' }}"
+          echo "VPS_USER is set: ${{ secrets.VPS_USER != '' }}"
+          echo "VPS_SSH_KEY is set: ${{ secrets.VPS_SSH_KEY != '' }}"
+          echo "VPS_PORT is set: ${{ secrets.VPS_PORT != '' }}"
+          echo "VPS_PROJECT_PATH is set: ${{ secrets.VPS_PROJECT_PATH != '' }}"
+          echo "VPS_BACKEND_APP_PATH is set: ${{ secrets.VPS_BACKEND_APP_PATH != '' }}"
+          echo "VPS_BACKEND_PM2_NAME is set: ${{ secrets.VPS_BACKEND_PM2_NAME != '' }}"
+          echo "VPS_FRONTEND_DIST_PATH is set: ${{ secrets.VPS_FRONTEND_DIST_PATH != '' }}"
+          echo "VPS_FRONTEND_WEB_ROOT is set: ${{ secrets.VPS_FRONTEND_WEB_ROOT != '' }}"
+          echo "VPS_FRONTEND_PM2_NAME is set: ${{ secrets.VPS_FRONTEND_PM2_NAME != '' }}"
+
       - name: Download frontend dist
         uses: actions/download-artifact@v4
         with:
