@@ -68,7 +68,7 @@ jobs:
     needs: [build-frontend, build-backend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-       - name: Debug Environment Secrets
+      - name: Debug Environment Secrets
         run: |
           echo "Checking if environment secrets are present..."
           echo "VPS_HOST is set: ${{ secrets.VPS_HOST != '' }}"
