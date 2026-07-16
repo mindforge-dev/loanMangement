@@ -125,17 +125,18 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             # Update repository scripts on the VPS first
-            cd "${{ secrets.VPS_PROJECT_PATH }}"
+            PROJECT_PATH=$(echo "${{ secrets.VPS_PROJECT_PATH }}" | xargs)
+            cd "$PROJECT_PATH"
             git fetch origin main
             git reset --hard origin/main
 
             # Deploy backend (install prod deps + restart pm2 app)
-            export APP_DIR="${{ secrets.VPS_BACKEND_APP_PATH }}"
-            export PM2_NAME="${{ secrets.VPS_BACKEND_PM2_NAME }}"
+            export APP_DIR=$(echo "${{ secrets.VPS_BACKEND_APP_PATH }}" | xargs)
+            export PM2_NAME=$(echo "${{ secrets.VPS_BACKEND_PM2_NAME }}" | xargs)
             bash scripts/deploy-backend.sh
 
             # Deploy frontend (rsync dist to web root + reload pm2 app if needed)
-            export DIST_DIR="${{ secrets.VPS_FRONTEND_DIST_PATH }}"
-            export WEB_ROOT="${{ secrets.VPS_FRONTEND_WEB_ROOT }}"
-            export PM2_NAME="${{ secrets.VPS_FRONTEND_PM2_NAME }}"
+            export DIST_DIR=$(echo "${{ secrets.VPS_FRONTEND_DIST_PATH }}" | xargs)
+            export WEB_ROOT=$(echo "${{ secrets.VPS_FRONTEND_WEB_ROOT }}" | xargs)
+            export PM2_NAME=$(echo "${{ secrets.VPS_FRONTEND_PM2_NAME }}" | xargs)
             bash scripts/deploy-frontend.sh
