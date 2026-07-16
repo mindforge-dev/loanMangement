@@ -10,7 +10,6 @@ jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
-    environment: loan_management
     steps:
       - uses: actions/checkout@v4
 
@@ -68,7 +67,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: loan_management
     steps:
       - name: Debug Environment Secrets
         run: |
