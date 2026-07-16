@@ -1,27 +1,48 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+} from "typeorm";
+import type { Role } from "../rbac/entities/role.entity";
+import type { Permission } from "../rbac/entities/permission.entity";
 
-export enum UserRole {
-    ADMIN = 'ADMIN',
-    LOAN_OFFICER = 'LOAN_OFFICER',
-}
-
-@Entity()
+@Entity("users")
 export class User {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
-    @Column()
-    name!: string;
+  @Column()
+  name!: string;
 
-    @Column({ unique: true })
-    email!: string;
+  @Column({ unique: true })
+  email!: string;
 
-    @Column()
-    passwordHash!: string;
+  @Column()
+  passwordHash!: string;
 
-    @Column({ type: 'simple-enum', enum: UserRole, default: UserRole.LOAN_OFFICER })
-    role!: UserRole;
+  @ManyToMany("Role", "users")
+  @JoinTable({
+    name: "user_has_roles",
+    joinColumn: { name: "user_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "role_id", referencedColumnName: "id" },
+  })
+  roles!: Role[];
 
-    @CreateDateColumn()
-    createdAt!: Date;
+  @ManyToMany("Permission", "users")
+  @JoinTable({
+    name: "user_has_permissions",
+    joinColumn: { name: "user_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "permission_id", referencedColumnName: "id" },
+  })
+  permissions!: Permission[];
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

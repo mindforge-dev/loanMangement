@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CreateUserSchema, LoginSchema } from './users.validators';
+import { ManageUserRolesSchema, ManageUserPermissionsSchema } from './users.validators';
 
-export type CreateUserDTO = z.infer<typeof CreateUserSchema>['body'];
-export type LoginDTO = z.infer<typeof LoginSchema>['body'];
+export type ManageUserRolesDTO = z.infer<typeof ManageUserRolesSchema>['body'];
+export type ManageUserPermissionsDTO = z.infer<typeof ManageUserPermissionsSchema>['body'];

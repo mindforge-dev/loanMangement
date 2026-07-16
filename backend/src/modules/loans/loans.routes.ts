@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../../common/middleware/auth.middleware";
-import { authorize } from "../../common/middleware/rbac.middleware";
+import { checkPermissions } from "../../common/middleware/rbac.middleware";
 import { validate } from "../../common/middleware/validate.middleware";
 import { loanController } from "./loans.controller";
 import {
@@ -8,42 +8,59 @@ import {
   UpdateLoanSchema,
   UpdateLoanStatusSchema,
 } from "./loans.validators";
-import { UserRole } from "../users/user.entity";
+import { ModulePermission } from "../rbac/enums/permissions";
 
 const router = Router();
 
 router.post(
   "/",
   authenticate,
+  checkPermissions(ModulePermission.LOANS_CREATE),
   validate(CreateLoanSchema),
   loanController.create,
 );
-router.get("/", authenticate, loanController.findAll);
-router.get("/borrower/:borrowerName", authenticate, loanController.getByBorrower);
+router.get(
+  "/",
+  authenticate,
+  checkPermissions(ModulePermission.LOANS_VIEW),
+  loanController.findAll,
+);
+router.get(
+  "/borrower/:borrowerName",
+  authenticate,
+  checkPermissions(ModulePermission.LOANS_VIEW),
+  loanController.getByBorrower,
+);
 router.get(
   "/borrower/id/:borrowerId",
   authenticate,
+  checkPermissions(ModulePermission.LOANS_VIEW),
   loanController.getByBorrowerId,
 );
-router.get("/:id", authenticate, loanController.findById);
+router.get(
+  "/:id",
+  authenticate,
+  checkPermissions(ModulePermission.LOANS_VIEW),
+  loanController.findById,
+);
 router.put(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  checkPermissions(ModulePermission.LOANS_EDIT),
   validate(UpdateLoanSchema),
   loanController.update,
 );
 router.patch(
   "/:id/status",
   authenticate,
-  authorize(UserRole.ADMIN),
+  checkPermissions(ModulePermission.LOANS_UPDATE_STATUS),
   validate(UpdateLoanStatusSchema),
   loanController.update,
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  checkPermissions(ModulePermission.LOANS_DELETE),
   loanController.delete,
 );
 

@@ -7,6 +7,21 @@ import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
 import { Loan } from "../modules/loans/loan.entity";
 import { Transaction } from "../modules/transactions/transactions.entity";
 import { Contract } from "../modules/contracts/contract.entity";
+import { Role } from "../modules/rbac/entities/role.entity";
+import { Permission } from "../modules/rbac/entities/permission.entity";
+import { RefreshToken } from "../modules/rbac/entities/refresh-token.entity";
+
+const entities = [
+  User,
+  Borrower,
+  InterestRate,
+  Loan,
+  Transaction,
+  Contract,
+  Role,
+  Permission,
+  RefreshToken,
+];
 
 export const AppDataSource = new DataSource(
   env.NODE_ENV === "test"
@@ -15,7 +30,7 @@ export const AppDataSource = new DataSource(
       database: ":memory:",
       synchronize: true,
       dropSchema: true,
-      entities: [User, Borrower, InterestRate, Loan, Transaction, Contract],
+      entities,
       logging: false,
     }
     : {
@@ -27,7 +42,7 @@ export const AppDataSource = new DataSource(
       database: env.DB_NAME,
       synchronize: env.NODE_ENV === "development",
       logging: env.NODE_ENV === "development",
-      entities: [User, Borrower, InterestRate, Loan, Transaction, Contract],
+      entities,
       migrations: [],
       subscribers: [],
     },

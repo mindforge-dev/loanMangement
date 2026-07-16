@@ -1,34 +1,46 @@
 import { Router } from "express";
 import { authenticate } from "../../common/middleware/auth.middleware";
-import { authorize } from "../../common/middleware/rbac.middleware";
+import { checkPermissions } from "../../common/middleware/rbac.middleware";
 import { validate } from "../../common/middleware/validate.middleware";
 import { borrowerController } from "./borrowers.controller";
 import {
   CreateBorrowerSchema,
   UpdateBorrowerSchema,
 } from "./borrowers.validators";
-import { UserRole } from "../users/user.entity";
+import { ModulePermission } from "../rbac/enums/permissions";
 
 const router = Router();
 
 router.post(
   "/",
   authenticate,
+  checkPermissions(ModulePermission.BORROWERS_CREATE),
   validate(CreateBorrowerSchema),
   borrowerController.create,
 );
-router.get("/", authenticate, borrowerController.findAll);
-router.get("/:id", authenticate, borrowerController.findById);
+router.get(
+  "/",
+  authenticate,
+  checkPermissions(ModulePermission.BORROWERS_VIEW),
+  borrowerController.findAll,
+);
+router.get(
+  "/:id",
+  authenticate,
+  checkPermissions(ModulePermission.BORROWERS_VIEW),
+  borrowerController.findById,
+);
 router.put(
   "/:id",
   authenticate,
+  checkPermissions(ModulePermission.BORROWERS_EDIT),
   validate(UpdateBorrowerSchema),
   borrowerController.update,
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  checkPermissions(ModulePermission.BORROWERS_DELETE),
   borrowerController.delete,
 );
 

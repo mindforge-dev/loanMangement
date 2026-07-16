@@ -5,7 +5,7 @@ A modular backend boilerplate using Node.js, Express, TypeScript, TypeORM, Postg
 ## Features
 - **Modular Architecture**: Feature-based modules (Auth, Users)
 - **Authentication**: JWT-based auth with `common/utils/jwt.ts` and `auth.middleware.ts`
-- **Authorization**: RBAC (Role-Based Access Control) with `rbac.middleware.ts`
+- **Authorization**: Spatie-style RBAC — `users` ↔ `roles` ↔ `permissions` with granular `module:action` permissions and a `super-admin` bypass. See `src/modules/rbac/` and `src/common/middleware/rbac.middleware.ts` (`checkPermissions`).
 - **Validation**: Request validation using `Zod` and `validate.middleware.ts`
 - **Database**: TypeORM with PostgreSQL
 - **Error Handling**: Centralized error handling for Zod errors, App errors, and unknown errors.
@@ -71,10 +71,12 @@ This project uses Docker Compose Watch for a smooth development experience.
 ## API Endpoints
 
 ### Auth
-- `POST /auth/register` - Register a new user
-  - Body: `{ "name": "John", "email": "john@example.com", "password": "pass", "role": "LOAN_OFFICER" }`
-- `POST /auth/login` - Login
+- `POST /auth/register` - Register a new user (assigned the default `loan-officer` role; role is not client-settable)
+  - Body: `{ "name": "John", "email": "john@example.com", "password": "pass" }`
+- `POST /auth/login` - Login (returns `accessToken` + `refreshToken`)
   - Body: `{ "email": "john@example.com", "password": "pass" }`
+- `POST /auth/refresh` - Rotate refresh token → new access/refresh pair
+- `POST /auth/logout` - Revoke a refresh token
 
 ### Users
 - `GET /users/me` (Protected) - Get current user profile

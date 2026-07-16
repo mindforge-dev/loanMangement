@@ -1,21 +1,16 @@
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
-import { UserRole } from './user.entity';
 
 extendZodWithOpenApi(z);
 
-export const CreateUserSchema = z.object({
+export const ManageUserRolesSchema = z.object({
     body: z.object({
-        name: z.string().min(2).openapi({ example: 'Jane Doe' }),
-        email: z.string().email().openapi({ example: 'jane@example.com' }),
-        password: z.string().min(6).openapi({ example: 'securepass' }),
-        role: z.nativeEnum(UserRole).optional().openapi({ example: UserRole.LOAN_OFFICER }),
-    }).openapi('CreateUserRequest'),
+        roles: z.array(z.string()).openapi({ example: ['loan-officer', 'admin'] }),
+    }).openapi('ManageUserRolesRequest'),
 });
 
-export const LoginSchema = z.object({
+export const ManageUserPermissionsSchema = z.object({
     body: z.object({
-        email: z.string().email().openapi({ example: 'jane@example.com' }),
-        password: z.string().openapi({ example: 'securepass' }),
-    }),
+        permissions: z.array(z.string()).openapi({ example: ['loans:view', 'loans:create'] }),
+    }).openapi('ManageUserPermissionsRequest'),
 });

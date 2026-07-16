@@ -1,9 +1,10 @@
 /// <reference path="../types/express.d.ts" />
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt';
+import { verifyAccessToken } from '../utils/jwt';
 import { UnauthorizedError } from '../errors/http-errors';
+import { authService } from '../../modules/auth/auth.service';
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,8 +14,12 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     const token = authHeader.split(' ')[1];
 
     try {
-        const payload = verifyToken(token);
-        req.user = payload;
+        const payload = verifyAccessToken(token);
+        const user = await authService.getUserWithPermissions(payload.sub);
+        if (!user) {
+            return next(new UnauthorizedError('User not found'));
+        }
+        req.user = user;
         next();
     } catch (error) {
         next(new UnauthorizedError('Invalid or expired token'));

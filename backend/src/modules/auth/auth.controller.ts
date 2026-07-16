@@ -19,6 +19,24 @@ export class AuthController {
             next(error);
         }
     }
+
+    async refresh(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await authService.refreshAccessToken(req.body.refreshToken);
+            res.json({ data: result });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            await authService.revokeRefreshToken(req.body.refreshToken);
+            res.status(204).send();
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const authController = new AuthController();

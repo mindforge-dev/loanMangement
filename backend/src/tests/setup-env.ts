@@ -6,4 +6,7 @@ process.env.DB_USER = 'postgres';
 process.env.DB_PASS = 'password';
 process.env.DB_NAME = 'loan_management_test';
 process.env.JWT_SECRET = 'test_secret';
+process.env.JWT_REFRESH_SECRET = 'test_refresh_secret';
+process.env.JWT_ACCESS_EXPIRES_IN = '30m';
+process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 process.env.JWT_EXPIRES_IN = '1h';

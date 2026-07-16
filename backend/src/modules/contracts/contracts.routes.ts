@@ -5,6 +5,8 @@ import { contractController } from "./contracts.controller";
 import { validate } from "../../common/middleware/validate.middleware";
 import { CreateContractSchema } from "./contracts.validators";
 import { authenticate } from "../../common/middleware/auth.middleware";
+import { checkPermissions } from "../../common/middleware/rbac.middleware";
+import { ModulePermission } from "../rbac/enums/permissions";
 
 const router = Router();
 
@@ -30,13 +32,14 @@ const upload = multer({
 
 router.post(
     "/",
+    checkPermissions(ModulePermission.CONTRACTS_CREATE),
     upload.single("file"),
     validate(CreateContractSchema),
     contractController.createWithFile
 );
 
-router.get("/loan/:loanId", contractController.getByLoan);
+router.get("/loan/:loanId", checkPermissions(ModulePermission.CONTRACTS_VIEW), contractController.getByLoan);
 
-router.get("/:id/download", contractController.download);
+router.get("/:id/download", checkPermissions(ModulePermission.CONTRACTS_DOWNLOAD), contractController.download);
 
 export default router;

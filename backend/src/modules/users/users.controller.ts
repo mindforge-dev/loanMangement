@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { userService } from './users.service';
-import { NotFoundError } from '../../common/errors/http-errors';
+import { authService } from '../auth/auth.service';
+import { NotFoundError, BadRequestError } from '../../common/errors/http-errors';
 import { BaseController } from '../../common/base/baseController';
 import { User } from './user.entity';
 
@@ -11,29 +12,85 @@ export class UserController extends BaseController<User> {
 
     getMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const userId = req.user!.userId;
-            const user = await this.service.findById(userId);
-
-            if (!user) {
+            // `req.user` is already the fresh, permission-loaded principal
+            if (!req.user) {
                 throw new NotFoundError('User not found');
             }
-
-            const { passwordHash, ...safeUser } = user;
-            res.json({ data: safeUser });
+            res.json({ data: req.user });
         } catch (error) {
             next(error);
         }
     };
 
-    // Override getAll to apply safety filter
+    // Override getAll to strip password hashes
     getAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const users = await this.service.findAll();
-            const safeUsers = users.map(u => {
+            const safeUsers = users.map((u) => {
                 const { passwordHash, ...safe } = u;
                 return safe;
             });
             res.json({ data: safeUsers });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    mePermissions = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.user) throw new NotFoundError('User not found');
+            res.json({
+                data: {
+                    roles: req.user.roles,
+                    permissions: req.user.permissions,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    listRoles = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const roles = await authService.getAllRoles();
+            res.json({ data: roles });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    listPermissions = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const permissions = await authService.getAllPermissions();
+            res.json({ data: permissions });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    assignRoles = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const { roles } = req.body;
+            if (!Array.isArray(roles)) {
+                throw new BadRequestError('`roles` must be an array of role names');
+            }
+            const user = await authService.assignRoles(id, roles);
+            res.json({ data: user });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    syncPermissions = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const { permissions } = req.body;
+            if (!Array.isArray(permissions)) {
+                throw new BadRequestError('`permissions` must be an array of permission names');
+            }
+            const user = await authService.syncPermissions(id, permissions);
+            res.json({ data: user });
         } catch (error) {
             next(error);
         }
