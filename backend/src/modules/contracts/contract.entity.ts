@@ -20,8 +20,9 @@ export class Contract {
     @JoinColumn({ name: "loan_id" })
     loan!: Loan;
 
+    /** S3/MinIO object key (replaces local file_path). */
     @Column()
-    file_path!: string;
+    object_key!: string;
 
     @Column()
     original_file_name!: string;

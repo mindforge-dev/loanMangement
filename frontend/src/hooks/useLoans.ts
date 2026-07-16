@@ -28,7 +28,6 @@ export const loanKeys = {
     [...loanKeys.all, "borrower", borrowerId] as const,
 };
 
-// Get all loans with pagination
 export const useLoans = (
   params?: PaginationParams,
 ): UseQueryResult<PaginatedResponse<Loan>, Error> => {
@@ -39,7 +38,6 @@ export const useLoans = (
   });
 };
 
-// Get loans by borrower
 export const useLoansByBorrower = (
   borrowerId: string,
 ): UseQueryResult<{ data: Loan[] }, Error> => {
@@ -50,7 +48,6 @@ export const useLoansByBorrower = (
   });
 };
 
-// Get single loan
 export const useLoan = (id: string): UseQueryResult<Loan, Error> => {
   return useQuery({
     queryKey: loanKeys.detail(id),
@@ -59,7 +56,6 @@ export const useLoan = (id: string): UseQueryResult<Loan, Error> => {
   });
 };
 
-// Create loan mutation
 export const useCreateLoan = (): UseMutationResult<
   Loan,
   Error,
@@ -80,7 +76,6 @@ export const useCreateLoan = (): UseMutationResult<
   });
 };
 
-// Update loan mutation
 export const useUpdateLoan = (): UseMutationResult<
   Loan,
   Error,
@@ -100,7 +95,6 @@ export const useUpdateLoan = (): UseMutationResult<
   });
 };
 
-// Update loan status mutation
 export const useUpdateLoanStatus = (): UseMutationResult<
   Loan,
   Error,
@@ -120,7 +114,6 @@ export const useUpdateLoanStatus = (): UseMutationResult<
   });
 };
 
-// Delete loan mutation
 export const useDeleteLoan = (): UseMutationResult<void, Error, string> => {
   const queryClient = useQueryClient();
 

@@ -28,7 +28,9 @@ export const createLoanColumns = (
     isDeleting: boolean,
     canEdit: boolean,
     canDelete: boolean,
-    canUpdateStatus: boolean
+    canUpdateStatus: boolean,
+    canViewContracts: boolean,
+    handleViewContracts: (loan: Loan) => void
 ) => [
         columnHelper.accessor('borrower', {
             id: 'borrower_name',
@@ -135,10 +137,18 @@ export const createLoanColumns = (
             id: 'actions',
             header: 'Actions',
             cell: (info) => {
-                const showActions = canEdit || canDelete
+                const showActions = canEdit || canDelete || canViewContracts
                 if (!showActions) return null
                 return (
                     <div className="text-sm font-medium space-x-2">
+                        {canViewContracts && (
+                            <button
+                                onClick={() => handleViewContracts(info.row.original)}
+                                className="text-teal-600 hover:text-teal-900"
+                            >
+                                Contracts
+                            </button>
+                        )}
                         {canEdit && (
                             <button
                                 onClick={() => handleEdit(info.row.original)}

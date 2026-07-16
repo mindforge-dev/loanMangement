@@ -22,16 +22,20 @@ import CreateLoan from "./createLoans/CreateLoan";
 import ServerPagination from "./ServerPagination";
 import Notification from "../../../components/Notification";
 import { useDebounce } from "../../../hooks/useDebounce";
+import ContractsModal from "./ContractsModal";
 
 function Loans() {
   const canCreate = useHasPermission(Permissions.LOANS_CREATE);
   const canEdit = useHasPermission(Permissions.LOANS_EDIT);
   const canDelete = useHasPermission(Permissions.LOANS_DELETE);
   const canUpdateStatus = useHasPermission(Permissions.LOANS_UPDATE_STATUS);
+  const canViewContracts = useHasPermission(Permissions.CONTRACTS_VIEW);
 
   // State for pagination and filters
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [isContractsModalOpen, setIsContractsModalOpen] = useState(false);
+  const [selectedLoanForContracts, setSelectedLoanForContracts] = useState<Loan | null>(null);
   const [status, setStatus] = useState<string>("");
   const [loanType, setLoanType] = useState<string>("");
   const [borrowerFullName, setBorrowerFullName] = useState<string>("");
@@ -159,6 +163,11 @@ function Loans() {
     setIsCreateModalOpen(true);
   }, []);
 
+  const handleViewContracts = useCallback((loan: Loan) => {
+    setSelectedLoanForContracts(loan);
+    setIsContractsModalOpen(true);
+  }, []);
+
   const handleCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
     setSelectedLoan(null);
@@ -191,8 +200,10 @@ function Loans() {
       canEdit,
       canDelete,
       canUpdateStatus,
+      canViewContracts,
+      handleViewContracts,
     );
-    if (!canEdit && !canDelete) {
+    if (!canEdit && !canDelete && !canViewContracts) {
       return cols.filter((col) => col.id !== "actions");
     }
     return cols;
@@ -204,6 +215,8 @@ function Loans() {
     canEdit,
     canDelete,
     canUpdateStatus,
+    canViewContracts,
+    handleViewContracts,
   ]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -462,6 +475,18 @@ function Loans() {
           });
         }}
       />
+
+      {/* Contracts Modal */}
+      {isContractsModalOpen && selectedLoanForContracts && (
+        <ContractsModal
+          isOpen={isContractsModalOpen}
+          onClose={() => {
+            setIsContractsModalOpen(false);
+            setSelectedLoanForContracts(null);
+          }}
+          loan={selectedLoanForContracts}
+        />
+      )}
 
       {/* Notification */}
       <Notification

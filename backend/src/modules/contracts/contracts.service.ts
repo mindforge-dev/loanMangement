@@ -1,8 +1,7 @@
 import { ICrudService } from "../../common/base/interfaces/service";
 import { Contract } from "./contract.entity";
 import { contractRepository, ContractRepository } from "./contracts.repository";
-import fs from "fs";
-import path from "path";
+import { deleteFile } from "../../common/services/storage.service";
 import {
     PaginatedResult,
     PaginationParams,
@@ -39,9 +38,11 @@ export class ContractService implements ICrudService<Contract> {
 
     async delete(id: string): Promise<void> {
         const contract = await this.contractRepo.findById(id);
-        if (contract && contract.file_path) {
-            if (fs.existsSync(contract.file_path)) {
-                fs.unlinkSync(contract.file_path);
+        if (contract?.object_key) {
+            try {
+                await deleteFile(contract.object_key);
+            } catch (err) {
+                console.error("Failed to delete object from MinIO:", err);
             }
         }
         return this.contractRepo.delete(id);

@@ -15,7 +15,6 @@ import type {
   PaginationParams,
 } from "../services/borrowerService";
 
-// Query keys
 export const borrowerKeys = {
   all: ["borrowers"] as const,
   lists: () => [...borrowerKeys.all, "list"] as const,
@@ -25,7 +24,6 @@ export const borrowerKeys = {
   detail: (id: string) => [...borrowerKeys.details(), id] as const,
 };
 
-// Get all borrowers with pagination
 export const useBorrowers = (
   params?: PaginationParams,
 ): UseQueryResult<PaginatedResponse<Borrower>, Error> => {
@@ -35,7 +33,6 @@ export const useBorrowers = (
   });
 };
 
-// Get single borrower
 export const useBorrower = (id: string): UseQueryResult<Borrower, Error> => {
   return useQuery({
     queryKey: borrowerKeys.detail(id),
@@ -44,7 +41,6 @@ export const useBorrower = (id: string): UseQueryResult<Borrower, Error> => {
   });
 };
 
-// Create borrower mutation
 export const useCreateBorrower = (): UseMutationResult<
   Borrower,
   Error,
@@ -60,7 +56,6 @@ export const useCreateBorrower = (): UseMutationResult<
   });
 };
 
-// Update borrower mutation
 export const useUpdateBorrower = (): UseMutationResult<
   Borrower,
   Error,
@@ -77,7 +72,6 @@ export const useUpdateBorrower = (): UseMutationResult<
   });
 };
 
-// Delete borrower mutation
 export const useDeleteBorrower = (): UseMutationResult<void, Error, string> => {
   const queryClient = useQueryClient();
 
