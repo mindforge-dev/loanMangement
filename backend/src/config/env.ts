@@ -11,6 +11,8 @@ const envSchema = z.object({
     DB_USER: z.string(),
     DB_PASS: z.string(),
     DB_NAME: z.string(),
+    DB_SSL: z.enum(["true", "false"]).default("false"),
+    DB_SSL_CERT: z.string().optional(), // path to CA cert, defaults to global-bundle.pem
     JWT_SECRET: z.string(),
     JWT_REFRESH_SECRET: z.string(),
     JWT_ACCESS_EXPIRES_IN: z.string().default('30m'),

@@ -1,82 +1,19 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+# Copies the pre-built frontend dist/ to the web root and reloads the web server.
+# Run from GitHub Actions after the build artifact has been uploaded via SCP.
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DIST_DIR="${DIST_DIR:?DIST_DIR is required, e.g. /opt/loan-management/frontend-dist}"
+WEB_ROOT="${WEB_ROOT:?WEB_ROOT is required, e.g. /var/www/loan-management}"
+PM2_NAME="${PM2_NAME:-}"
 
-FRONTEND_DIR="${FRONTEND_DIR:-${PROJECT_ROOT}/frontend}"
-FRONTEND_DEPLOY_DIR="${FRONTEND_DEPLOY_DIR:-}"
-FRONTEND_RELOAD_SERVICE="${FRONTEND_RELOAD_SERVICE:-}"
-FRONTEND_NODE_VERSION="${FRONTEND_NODE_VERSION:-20.19.0}"
-SUDO_BIN="${SUDO_BIN:-sudo}"
+echo "Syncing $DIST_DIR → $WEB_ROOT..."
+mkdir -p "$WEB_ROOT"
+rsync -a --delete "$DIST_DIR/" "$WEB_ROOT/"
 
-if [ -z "${FRONTEND_DEPLOY_DIR}" ]; then
-  echo "FRONTEND_DEPLOY_DIR is required (example: /var/www/loan-management-frontend)"
-  exit 1
+if [ -n "$PM2_NAME" ]; then
+  echo "Reloading $PM2_NAME via pm2..."
+  pm2 reload "$PM2_NAME" || pm2 restart "$PM2_NAME"
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-  echo "npm is required but not installed on this server"
-  exit 1
-fi
-
-if ! command -v rsync >/dev/null 2>&1; then
-  echo "rsync is required but not installed on this server"
-  exit 1
-fi
-
-if [ ! -f "${FRONTEND_DIR}/package.json" ]; then
-  echo "frontend package.json not found: ${FRONTEND_DIR}/package.json"
-  exit 1
-fi
-
-if [ "$(realpath "${FRONTEND_DIR}")" = "$(realpath "${FRONTEND_DEPLOY_DIR}")" ]; then
-  echo "FRONTEND_DEPLOY_DIR cannot be the same as FRONTEND_DIR"
-  echo "Set FRONTEND_DEPLOY_DIR to a web root like /var/www/loanMangement"
-  exit 1
-fi
-
-FRONTEND_DIR_REALPATH="$(realpath "${FRONTEND_DIR}")"
-FRONTEND_DIST_REALPATH="$(realpath "${FRONTEND_DIR}/dist" 2>/dev/null || true)"
-FRONTEND_DEPLOY_REALPATH="$(realpath "${FRONTEND_DEPLOY_DIR}")"
-
-if [[ "${FRONTEND_DEPLOY_REALPATH}" == "${FRONTEND_DIR_REALPATH}"/* ]]; then
-  echo "FRONTEND_DEPLOY_DIR cannot be inside FRONTEND_DIR"
-  echo "Current: ${FRONTEND_DEPLOY_REALPATH}"
-  echo "Use a separate path like /var/www/loanMangement"
-  exit 1
-fi
-
-if [ -n "${FRONTEND_DIST_REALPATH}" ] && [ "${FRONTEND_DEPLOY_REALPATH}" = "${FRONTEND_DIST_REALPATH}" ]; then
-  echo "FRONTEND_DEPLOY_DIR cannot be the dist directory itself"
-  echo "Current: ${FRONTEND_DEPLOY_REALPATH}"
-  exit 1
-fi
-
-# Load nvm if available and switch to required Node version for Vite build.
-if [ -s "${HOME}/.nvm/nvm.sh" ]; then
-  # shellcheck source=/dev/null
-  . "${HOME}/.nvm/nvm.sh"
-  nvm install "${FRONTEND_NODE_VERSION}" >/dev/null
-  nvm use "${FRONTEND_NODE_VERSION}" >/dev/null
-fi
-
-echo "Building frontend from ${FRONTEND_DIR}"
-cd "${FRONTEND_DIR}"
-echo "Install path: $(pwd)"
-ls -l package.json package-lock.json 2>/dev/null || true
-echo "node version: $(node -v)"
-echo "npm version: $(npm -v)"
-env -u NODE_ENV NPM_CONFIG_PRODUCTION=false npm ci --include=dev
-npm run build
-
-echo "Syncing dist to ${FRONTEND_DEPLOY_DIR}"
-mkdir -p "${FRONTEND_DEPLOY_DIR}"
-rsync -a --delete "${FRONTEND_DIR}/dist/" "${FRONTEND_DEPLOY_DIR}/"
-
-if [ -n "${FRONTEND_RELOAD_SERVICE}" ]; then
-  echo "Reloading service ${FRONTEND_RELOAD_SERVICE}"
-  ${SUDO_BIN} systemctl reload "${FRONTEND_RELOAD_SERVICE}"
-fi
-
-echo "Frontend deployment complete"
+echo "Frontend deployed."

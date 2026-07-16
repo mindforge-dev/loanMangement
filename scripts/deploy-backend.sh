@@ -1,25 +1,16 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+# Copies the pre-built backend dist/ to the VPS app directory and restarts the service.
+# Run from GitHub Actions after the build artifact has been uploaded via SCP.
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+APP_DIR="${APP_DIR:?APP_DIR is required, e.g. /opt/loan-management/backend}"
+PM2_NAME="${PM2_NAME:?PM2_NAME is required, e.g. loan-backend}"
 
-BACKEND_DIR="${BACKEND_DIR:-${PROJECT_ROOT}/backend}"
-BACKEND_COMPOSE_FILE="${BACKEND_COMPOSE_FILE:-${BACKEND_DIR}/docker-compose.yml}"
+echo "Installing production dependencies..."
+cd "$APP_DIR"
+npm ci --omit=dev
 
-if ! command -v docker >/dev/null 2>&1; then
-  echo "docker is required but not installed on this server"
-  exit 1
-fi
+echo "Restarting $PM2_NAME via pm2..."
+pm2 reload "$PM2_NAME" || pm2 restart "$PM2_NAME" || pm2 start dist/server.js --name "$PM2_NAME"
 
-if [ ! -f "${BACKEND_COMPOSE_FILE}" ]; then
-  echo "docker compose file not found: ${BACKEND_COMPOSE_FILE}"
-  exit 1
-fi
-
-echo "Deploying backend from ${BACKEND_DIR}"
-cd "${BACKEND_DIR}"
-
-docker compose -f "${BACKEND_COMPOSE_FILE}" up -d --build --remove-orphans
-
-echo "Backend deployment complete"
+echo "Backend deployed."

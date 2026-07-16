@@ -12,3 +12,4 @@ AGENTS.md
 .agents/
 skills-lock.json
 *.txt
+global-bundle.pem

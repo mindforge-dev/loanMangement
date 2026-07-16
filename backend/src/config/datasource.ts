@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { env } from "./env";
+import fs from "fs";
+import path from "path";
 import { User } from "../modules/users/user.entity";
 import { Borrower } from "../modules/borrowers/borrower.entity";
 import { InterestRate } from "../modules/interest-rates/interest-rate.entity";
@@ -45,5 +47,14 @@ export const AppDataSource = new DataSource(
       entities,
       migrations: [],
       subscribers: [],
+      // Enable SSL when DB_SSL=true (required for AWS RDS)
+      ...(env.DB_SSL === "true" && {
+        ssl: {
+          rejectUnauthorized: true,
+          ca: fs.readFileSync(
+            path.resolve(process.cwd(), env.DB_SSL_CERT ?? "global-bundle.pem"),
+          ),
+        },
+      }),
     },
 );
