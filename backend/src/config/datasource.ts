@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource(
       logging: false,
     }
     : {
-      type: "mysql",
+      type: "postgres",
       host: env.DB_HOST,
       port: parseInt(env.DB_PORT, 10),
       username: env.DB_USER,

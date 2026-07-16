@@ -25,7 +25,7 @@ describe('Auth Integration', () => {
     describe('POST /auth/register', () => {
         it('should register a new user successfully', async () => {
             const response = await request(app)
-                .post('/auth/register')
+                .post('/api/auth/register')
                 .send({
                     name: 'Test User',
                     email: 'test@example.com',
@@ -41,7 +41,7 @@ describe('Auth Integration', () => {
 
         it('should fail if email is invalid', async () => {
             const response = await request(app)
-                .post('/auth/register')
+                .post('/api/auth/register')
                 .send({
                     name: 'Test User',
                     email: 'invalid-email',
@@ -84,7 +84,7 @@ describe('Auth Integration', () => {
 
         it('should login successfully with correct credentials', async () => {
             const response = await request(app)
-                .post('/auth/login')
+                .post('/api/auth/login')
                 .send({
                     email: 'login@example.com',
                     password: 'password123',
@@ -96,7 +96,7 @@ describe('Auth Integration', () => {
 
         it('should fail with incorrect password', async () => {
             const response = await request(app)
-                .post('/auth/login')
+                .post('/api/auth/login')
                 .send({
                     email: 'login@example.com',
                     password: 'wrongpassword',

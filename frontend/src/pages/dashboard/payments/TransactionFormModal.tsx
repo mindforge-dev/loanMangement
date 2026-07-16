@@ -5,12 +5,7 @@ import {
   useTransactionForm,
   type CreateTransactionDto,
 } from "./useTransactionForm";
-
-interface TransactionFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
+import type { TransactionFormModalProps } from "../../../core/interfaces/payment.interface";
 
 export default function TransactionFormModal({
   isOpen,

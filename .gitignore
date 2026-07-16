@@ -8,3 +8,6 @@ node_modules
 dist
 tmp
 *.bak
+AGENTS.md
+.agents/
+skills-lock.json

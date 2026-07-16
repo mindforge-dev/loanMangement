@@ -1,49 +1,26 @@
 import { useState } from "react";
 import { useCreateTransaction } from "../../../hooks/useTransactions";
 import type { CreateTransactionDto } from "../../../services/transactionService";
+import type {
+    TransactionFormData,
+    TransactionFormErrors,
+} from "../../../core/types/payment.types";
+import type { UseTransactionFormProps } from "../../../core/interfaces/payment.interface";
+import { initialTransactionFormData } from "../../../core/constants/payment.constants";
 
 export type { CreateTransactionDto };
-
-export type FormData = {
-    loan_id: string;
-    payment_date: string;
-    borrower_id: string;
-    type: CreateTransactionDto["type"];
-    amount_paid: string;
-    remaining_balance: string;
-    payment_term_months: string;
-    method: string;
-    note: string;
-};
-
-export type FormErrors = Partial<Record<keyof FormData, string>>;
-
-export const initialFormData: FormData = {
-    loan_id: "",
-    payment_date: "",
-    borrower_id: "",
-    type: "REPAYMENT",
-    amount_paid: "",
-    remaining_balance: "",
-    payment_term_months: "",
-    method: "",
-    note: "",
-};
-
-interface UseTransactionFormProps {
-    onClose: () => void;
-    onSuccess?: () => void;
-}
 
 export const useTransactionForm = ({
     onClose,
     onSuccess,
 }: UseTransactionFormProps) => {
     const createTransactionMutation = useCreateTransaction();
-    const [formData, setFormData] = useState<FormData>(initialFormData);
-    const [errors, setErrors] = useState<FormErrors>({});
+    const [formData, setFormData] = useState<TransactionFormData>(
+        initialTransactionFormData,
+    );
+    const [errors, setErrors] = useState<TransactionFormErrors>({});
 
-    const updateField = (field: keyof FormData, value: string) => {
+    const updateField = (field: keyof TransactionFormData, value: string) => {
         setFormData((prev) => {
             const updated = { ...prev, [field]: value };
             if (field === "borrower_id") {
@@ -61,13 +38,13 @@ export const useTransactionForm = ({
     };
 
     const resetAndClose = () => {
-        setFormData(initialFormData);
+        setFormData(initialTransactionFormData);
         setErrors({});
         onClose();
     };
 
     const validateForm = (): boolean => {
-        const newErrors: FormErrors = {};
+        const newErrors: TransactionFormErrors = {};
 
         if (!formData.loan_id) newErrors.loan_id = "Loan is required";
         if (!formData.borrower_id) newErrors.borrower_id = "Borrower is required";

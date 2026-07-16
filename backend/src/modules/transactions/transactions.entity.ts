@@ -39,7 +39,7 @@ export class Transaction {
     payment_date!: Date;
 
     @Column({
-        type: "enum",
+        type: "simple-enum",
         enum: TransactionType,
         default: TransactionType.REPAYMENT
     })

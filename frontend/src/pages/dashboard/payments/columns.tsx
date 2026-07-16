@@ -1,9 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import type { Transaction } from '../../../services/transactionService'
-
-export interface TransactionTableRow extends Transaction {
-    borrower_name: string
-}
+import type { TransactionTableRow } from '../../../core/interfaces/payment.interface'
 
 const columnHelper = createColumnHelper<TransactionTableRow>()
 

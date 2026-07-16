@@ -11,7 +11,7 @@ import { DataTable, TableToolbar } from "../../../components/table";
 import { useTransactions } from "../../../hooks/useTransactions";
 import { useBorrowers } from "../../../hooks/useBorrowers";
 import { transactionColumns } from "./columns";
-import type { TransactionTableRow } from "./columns";
+import type { TransactionTableRow } from "../../../core/interfaces/payment.interface";
 import ServerPagination from "./ServerPagination";
 import TransactionFormModal from "./TransactionFormModal";
 import Notification from "../../../components/Notification";

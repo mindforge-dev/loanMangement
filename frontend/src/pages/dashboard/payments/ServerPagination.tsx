@@ -1,10 +1,4 @@
-import type { PaginationMeta } from "../../../services/transactionService";
-
-interface ServerPaginationProps {
-  meta?: PaginationMeta;
-  onPageChange: (page: number) => void;
-  onLimitChange: (limit: number) => void;
-}
+import type { ServerPaginationProps } from "../../../core/interfaces/common.interface";
 
 export default function ServerPagination({
   meta,
@@ -122,11 +116,10 @@ export default function ServerPagination({
                 <button
                   key={pageNum}
                   onClick={() => handlePageClick(pageNum as number)}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${
-                    page === pageNum
+                  className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${page === pageNum
                       ? "bg-indigo-600 text-white shadow-md"
                       : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm"
-                  }`}
+                    }`}
                 >
                   {pageNum}
                 </button>

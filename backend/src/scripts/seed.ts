@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 async function seed() {
   try {
     console.log("Initializing data source...");
-    AppDataSource.setOptions({ synchronize: false, dropSchema: false, logging: ["error"] });
+    AppDataSource.setOptions({ synchronize: true, dropSchema: false, logging: ["error"] });
     console.log(`Connecting to DB: Host=${process.env.DB_HOST}, Name=${process.env.DB_NAME}, Type=${AppDataSource.options.type}`);
     await AppDataSource.initialize();
     console.log("Data source initialized.");

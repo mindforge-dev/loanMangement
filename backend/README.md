@@ -1,18 +1,18 @@
 # Loan Management Backend
 
-A modular backend boilerplate using Node.js, Express, TypeScript, TypeORM, MySQL, Zod, and JWT.
+A modular backend boilerplate using Node.js, Express, TypeScript, TypeORM, PostgreSQL, Zod, and JWT.
 
 ## Features
 - **Modular Architecture**: Feature-based modules (Auth, Users)
 - **Authentication**: JWT-based auth with `common/utils/jwt.ts` and `auth.middleware.ts`
 - **Authorization**: RBAC (Role-Based Access Control) with `rbac.middleware.ts`
 - **Validation**: Request validation using `Zod` and `validate.middleware.ts`
-- **Database**: TypeORM with MySQL
+- **Database**: TypeORM with PostgreSQL
 - **Error Handling**: Centralized error handling for Zod errors, App errors, and unknown errors.
 
 ## Prerequisites
 - Node.js (v18+)
-- MySQL Database
+- PostgreSQL Database
 - Docker & Docker Compose (optional)
 
 ## Setup
@@ -24,11 +24,11 @@ This project uses Docker Compose Watch for a smooth development experience.
     ```bash
     docker compose up --watch
     ```
-    This will start MySQL and the Node.js app. Changes in `src/` will automatically sync to the container and trigger a restart/hot-reload (handled by nodemon inside the container).
+    This will start PostgreSQL and the Node.js app. Changes in `src/` will automatically sync to the container and trigger a restart/hot-reload (handled by nodemon inside the container).
 
 2.  **Access**:
     API is running at `http://localhost:3000`
-    MySQL is exposed at `localhost:3306`
+    PostgreSQL is exposed at `localhost:5432`
 
 ### Manual Setup
 1. **Install dependencies**
@@ -48,7 +48,7 @@ This project uses Docker Compose Watch for a smooth development experience.
    - `JWT_SECRET`
 
 3. **Database**
-   Create a MySQL database matching `DB_NAME`.
+    Create a PostgreSQL database matching `DB_NAME`.
    By default, `synchronize: true` is enabled for development (in `src/config/datasource.ts`), which will automatically create tables based on entities.
 
    **For Production**:
