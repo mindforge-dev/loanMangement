@@ -14,6 +14,7 @@ import { useHasPermission } from "../../../hooks/useAuth";
 import { Permissions } from "../../../lib/permissions";
 import type { User } from "../../../services/userService";
 import UserAccessModal from "./UserAccessModal";
+import CreateUserModal from "./CreateUserModal";
 
 const columnHelper = createColumnHelper<User>();
 
@@ -28,6 +29,7 @@ function Users() {
 
   const [accessUser, setAccessUser] = useState<User | null>(null);
   const [showAccess, setShowAccess] = useState(false);
+  const [showCreateUser, setShowCreateUser] = useState(false);
 
   const handleManage = useCallback((user: User) => {
     setAccessUser(user);
@@ -48,8 +50,7 @@ function Users() {
   );
 
   const handleAddUser = useCallback(() => {
-    console.log("Add new user");
-    // TODO: Implement add user functionality with a modal
+    setShowCreateUser(true);
   }, []);
 
   const columns = useMemo(
@@ -183,6 +184,11 @@ function Users() {
         user={accessUser}
         isOpen={showAccess}
         onClose={() => setShowAccess(false)}
+      />
+
+      <CreateUserModal
+        isOpen={showCreateUser}
+        onClose={() => setShowCreateUser(false)}
       />
     </div>
   );

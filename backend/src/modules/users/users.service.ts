@@ -1,5 +1,8 @@
+import bcrypt from 'bcryptjs';
 import { userRepository, UserRepository } from './users.repository';
 import { User } from './user.entity';
+import { authService } from '../auth/auth.service';
+import { BadRequestError } from '../../common/errors/http-errors';
 import { ICrudService } from '../../common/base/interfaces/service';
 import {
     PaginatedResult,
@@ -11,6 +14,27 @@ export class UserService implements ICrudService<User> {
 
     constructor() {
         this.userRepo = userRepository;
+    }
+
+    async createUserManual(data: { name: string; email: string; password?: string; roles?: string[] }): Promise<User> {
+        const existingUser = await this.userRepo.findByEmail(data.email);
+        if (existingUser) {
+            throw new BadRequestError('User already exists');
+        }
+
+        const password = data.password || 'TemporaryPassword123!';
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const created = await this.userRepo.create({
+            name: data.name,
+            email: data.email,
+            passwordHash,
+        });
+
+        const rolesToAssign = data.roles && data.roles.length > 0 ? data.roles : ['loan-officer'];
+        await authService.assignRoles(created.id, rolesToAssign);
+
+        return (await this.findById(created.id))!;
     }
 
     async create(data: Partial<User>): Promise<User> {

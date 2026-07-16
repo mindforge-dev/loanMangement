@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
 import {
     HomeIcon,
@@ -11,7 +11,9 @@ import {
     Bars3Icon,
     XMarkIcon,
     BellIcon,
-    UserCircleIcon
+    UserCircleIcon,
+    ChevronDownIcon,
+    ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { useAuth, useLogout } from '../hooks/useAuth'
 import { Permissions, hasPermission } from '../lib/permissions'
@@ -19,9 +21,14 @@ import { useAuthStore } from '../stores/authStore'
 
 type NavItem = {
     name: string
-    href: string
+    href?: string
     icon: typeof HomeIcon
     permission?: string
+    children?: {
+        name: string
+        href: string
+        permission?: string
+    }[]
 }
 
 const navigation: NavItem[] = [
@@ -31,7 +38,14 @@ const navigation: NavItem[] = [
     { name: 'Borrowers', href: '/borrowers', icon: UserGroupIcon, permission: Permissions.BORROWERS_VIEW },
     { name: 'Payments', href: '/payments', icon: CreditCardIcon, permission: Permissions.TRANSACTIONS_VIEW },
     { name: 'Reports', href: '/reports', icon: ChartBarIcon },
-    { name: 'Settings', href: '/settings', icon: CogIcon },
+    {
+        name: 'Settings',
+        icon: CogIcon,
+        children: [
+            { name: 'General Settings', href: '/settings?tab=general' },
+            { name: 'Roles & Permissions', href: '/settings?tab=rbac' }
+        ]
+    },
 ]
 
 function DashboardLayout() {
@@ -41,12 +55,39 @@ function DashboardLayout() {
     const logoutMutation = useLogout()
     const currentUser = useAuthStore((state) => state.user)
 
+    const [settingsOpen, setSettingsOpen] = useState(() => {
+        return location.pathname.startsWith('/settings')
+    })
+
+    // Auto-open settings dropdown when loading settings routes
+    useEffect(() => {
+        if (location.pathname.startsWith('/settings')) {
+            setSettingsOpen(true)
+        }
+    }, [location.pathname])
+
     const visibleNav = navigation.filter(
         (item) => !item.permission || hasPermission(currentUser, item.permission),
     )
 
-    const isActive = (path: string) => {
-        return location.pathname === path
+    const isActive = (item: NavItem) => {
+        if (item.href) {
+            return location.pathname === item.href
+        }
+        if (item.children) {
+            return item.children.some(child => {
+                const childPath = child.href.split('?')[0]
+                return location.pathname === childPath
+            })
+        }
+        return false
+    }
+
+    const isChildActive = (href: string) => {
+        const urlParams = new URLSearchParams(href.split('?')[1] || '')
+        const tab = urlParams.get('tab')
+        const currentTab = new URLSearchParams(location.search).get('tab') || 'general'
+        return location.pathname === href.split('?')[0] && currentTab === tab
     }
 
     return (
@@ -83,19 +124,71 @@ function DashboardLayout() {
                     <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                         {visibleNav.map((item) => {
                             const Icon = item.icon
-                            const active = isActive(item.href)
+                            const active = isActive(item)
+
+                            if (item.children) {
+                                return (
+                                    <div key={item.name} className="space-y-1">
+                                        <button
+                                            onClick={() => setSettingsOpen(!settingsOpen)}
+                                            className={`
+                                                w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+                                                ${active
+                                                    ? 'text-white'
+                                                    : 'text-indigo-100 hover:bg-indigo-800 hover:text-white'
+                                                }
+                                            `}
+                                        >
+                                            <div className="flex items-center">
+                                                <Icon className="h-5 w-5 mr-3" />
+                                                <span className="font-medium">{item.name}</span>
+                                            </div>
+                                            {settingsOpen ? (
+                                                <ChevronDownIcon className="h-4 w-4 text-indigo-300" />
+                                            ) : (
+                                                <ChevronRightIcon className="h-4 w-4 text-indigo-300" />
+                                            )}
+                                        </button>
+                                        
+                                        {settingsOpen && (
+                                            <div className="pl-6 space-y-1">
+                                                {item.children.map((child) => {
+                                                    const childActive = isChildActive(child.href)
+                                                    return (
+                                                        <Link
+                                                            key={child.name}
+                                                            to={child.href}
+                                                            onClick={() => setSidebarOpen(false)}
+                                                            className={`
+                                                                flex items-center px-4 py-2 rounded-lg text-sm transition-all duration-200
+                                                                ${childActive
+                                                                    ? 'bg-indigo-950 text-white font-semibold shadow-inner'
+                                                                    : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+                                                                }
+                                                            `}
+                                                        >
+                                                            <span className="font-medium">{child.name}</span>
+                                                        </Link>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            }
+
                             return (
                                 <Link
                                     key={item.name}
-                                    to={item.href}
+                                    to={item.href || '#'}
                                     onClick={() => setSidebarOpen(false)}
                                     className={`
-                    flex items-center px-4 py-3 rounded-lg transition-all duration-200
-                    ${active
+                                        flex items-center px-4 py-3 rounded-lg transition-all duration-200
+                                        ${active
                                             ? 'bg-indigo-700 text-white shadow-lg'
                                             : 'text-indigo-100 hover:bg-indigo-800 hover:text-white'
                                         }
-                  `}
+                                    `}
                                 >
                                     <Icon className="h-5 w-5 mr-3" />
                                     <span className="font-medium">{item.name}</span>
@@ -131,7 +224,7 @@ function DashboardLayout() {
 
                         <div className="flex-1 flex justify-center lg:justify-start">
                         <h2 className="text-xl font-semibold text-gray-800">
-                            {visibleNav.find(item => isActive(item.href))?.name || 'Dashboard'}
+                            {visibleNav.find(item => isActive(item))?.name || 'Dashboard'}
                         </h2>
                         </div>
 

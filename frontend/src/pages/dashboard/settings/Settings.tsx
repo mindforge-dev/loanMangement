@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { useRoles, usePermissions } from "../../../hooks/useUsers";
 import { useHasPermission } from "../../../hooks/useAuth";
 import { Permissions } from "../../../lib/permissions";
@@ -9,8 +10,9 @@ function Settings() {
     const { data: roles = [], isLoading: loadingRoles } = useRoles();
     const { data: permissions = [], isLoading: loadingPerms } = usePermissions();
     const canManage = useHasPermission(Permissions.USERS_MANAGE);
+    const [searchParams] = useSearchParams();
 
-    const [activeSubTab, setActiveSubTab] = useState<"general" | "rbac">("general");
+    const activeSubTab = (searchParams.get("tab") as "general" | "rbac") || "general";
     const [showCreateRole, setShowCreateRole] = useState(false);
     const [showCreatePermission, setShowCreatePermission] = useState(false);
 
@@ -26,31 +28,7 @@ function Settings() {
                 <p className="text-gray-500 mt-1.5 text-sm">Configure system settings and manage access controls</p>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8">
-                {/* Nested sub-navigation */}
-                <div className="w-full lg:w-64 shrink-0 flex flex-row lg:flex-col gap-2 border-b lg:border-b-0 lg:border-r border-gray-200 pb-4 lg:pb-0 lg:pr-6">
-                    <button
-                        onClick={() => setActiveSubTab("general")}
-                        className={`flex-1 lg:flex-initial px-4 py-3 rounded-xl text-sm font-semibold text-left transition-all ${
-                            activeSubTab === "general"
-                                ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                    >
-                        General Settings
-                    </button>
-                    <button
-                        onClick={() => setActiveSubTab("rbac")}
-                        className={`flex-1 lg:flex-initial px-4 py-3 rounded-xl text-sm font-semibold text-left transition-all ${
-                            activeSubTab === "rbac"
-                                ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                    >
-                        Roles &amp; Permissions
-                    </button>
-                </div>
-
+            <div className="w-full">
                 {/* Tab content */}
                 <div className="flex-1">
                     {activeSubTab === "general" && (

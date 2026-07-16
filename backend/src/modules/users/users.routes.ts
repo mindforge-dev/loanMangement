@@ -9,6 +9,7 @@ import {
     ManageUserPermissionsSchema,
     CreateRoleSchema,
     CreatePermissionSchema,
+    CreateUserSchema,
 } from "./users.validators";
 
 const router = Router();
@@ -51,6 +52,13 @@ router.get(
     authenticate,
     checkPermissions(ModulePermission.USERS_VIEW),
     userController.getAll,
+);
+router.post(
+    "/",
+    authenticate,
+    checkPermissions(ModulePermission.USERS_MANAGE),
+    validate(CreateUserSchema),
+    userController.createManual,
 );
 
 // Role / permission assignment (sync semantics — overwrites the set)

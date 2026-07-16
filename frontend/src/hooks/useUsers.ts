@@ -10,8 +10,9 @@ import {
     getPermissions,
     createRole,
     createPermission,
+    createUser,
 } from '../services/userService'
-import type { User, Role, Permission } from '../services/userService'
+import type { User, Role, Permission, CreateUserDTO } from '../services/userService'
 
 // Query keys
 export const userKeys = {
@@ -123,6 +124,22 @@ export const useCreatePermission = (): UseMutationResult<
         mutationFn: ({ name }) => createPermission(name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: userKeys.permissions() })
+        },
+    })
+}
+
+// Create user mutation
+export const useCreateUser = (): UseMutationResult<
+    User,
+    Error,
+    CreateUserDTO
+> => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: createUser,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: userKeys.lists() })
         },
     })
 }

@@ -78,3 +78,15 @@ export const syncPermissions = async (
 export const deleteUser = async (id: string): Promise<void> => {
     await api.delete(`/dashboard/users/${id}`);
 };
+
+export interface CreateUserDTO {
+    name: string;
+    email: string;
+    password?: string;
+    roles?: string[];
+}
+
+export const createUser = async (data: CreateUserDTO): Promise<User> => {
+    const response = await api.post<{ data: User }>("/dashboard/users", data);
+    return response.data.data;
+};

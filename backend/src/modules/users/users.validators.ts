@@ -27,3 +27,12 @@ export const CreatePermissionSchema = z.object({
         name: z.string().min(1, 'Permission name is required').openapi({ example: 'loans:close' }),
     }).openapi('CreatePermissionRequest'),
 });
+
+export const CreateUserSchema = z.object({
+    body: z.object({
+        name: z.string().min(2, 'Name must be at least 2 characters').openapi({ example: 'Jane Doe' }),
+        email: z.string().email('Invalid email address').openapi({ example: 'jane@example.com' }),
+        password: z.string().min(6, 'Password must be at least 6 characters').optional().openapi({ example: 'Secr3tP@ss' }),
+        roles: z.array(z.string()).optional().openapi({ example: ['loan-officer'] }),
+    }).openapi('CreateUserRequest'),
+});

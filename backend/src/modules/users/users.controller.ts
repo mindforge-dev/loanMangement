@@ -119,6 +119,24 @@ export class UserController extends BaseController<User> {
             next(error);
         }
     };
+
+    createManual = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { name, email, password, roles } = req.body;
+            const user = await userService.createUserManual({ name, email, password, roles });
+            const safeUser = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                createdAt: user.createdAt,
+                roles: (user.roles ?? []).map((r) => r.name),
+                permissions: (user.permissions ?? []).map((p) => p.name),
+            };
+            res.status(201).json({ data: safeUser });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export const userController = new UserController();
