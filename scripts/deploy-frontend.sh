@@ -12,8 +12,12 @@ sudo mkdir -p "$WEB_ROOT"
 sudo rsync -a --delete "$DIST_DIR/" "$WEB_ROOT/"
 
 if [ -n "$PM2_NAME" ]; then
-  echo "Reloading $PM2_NAME via pm2..."
-  pm2 reload "$PM2_NAME" || pm2 restart "$PM2_NAME"
+  if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
+    echo "Reloading $PM2_NAME via pm2..."
+    pm2 reload "$PM2_NAME"
+  else
+    echo "PM2 process '$PM2_NAME' not active or found. Skipping PM2 reload."
+  fi
 fi
 
 echo "Frontend deployed."
