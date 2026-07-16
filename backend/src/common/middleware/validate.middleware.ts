@@ -9,15 +9,11 @@ export const validate = (schema: AnyZodObject) => (req: Request, res: Response, 
             params: req.params,
         });
 
-        req.body = parsed.body;
-        req.query = parsed.query;
-        req.params = parsed.params;
+        if (parsed.body) req.body = parsed.body;
+        if (parsed.query) req.query = parsed.query;
+        if (parsed.params) req.params = parsed.params;
         next();
     } catch (error) {
-        if (error instanceof ZodError) {
-            next(error);
-        } else {
-            next(error);
-        }
+        next(error);
     }
 };

@@ -6,8 +6,10 @@ import {
     deleteUser,
     assignRoles,
     syncPermissions,
+    getRoles,
+    getPermissions,
 } from '../services/userService'
-import type { User } from '../services/userService'
+import type { User, Role, Permission } from '../services/userService'
 
 // Query keys
 export const userKeys = {
@@ -15,6 +17,17 @@ export const userKeys = {
     lists: () => [...userKeys.all, 'list'] as const,
     details: () => [...userKeys.all, 'detail'] as const,
     detail: (id: string) => [...userKeys.details(), id] as const,
+    roles: () => [...userKeys.all, 'roles'] as const,
+    permissions: () => [...userKeys.all, 'permissions'] as const,
+}
+
+// RBAC catalog
+export const useRoles = (): UseQueryResult<Role[], Error> => {
+    return useQuery({ queryKey: userKeys.roles(), queryFn: getRoles })
+}
+
+export const usePermissions = (): UseQueryResult<Permission[], Error> => {
+    return useQuery({ queryKey: userKeys.permissions(), queryFn: getPermissions })
 }
 
 // Get all users

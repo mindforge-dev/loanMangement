@@ -10,21 +10,28 @@ import {
 import type { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { DataTable, Pagination, TableToolbar } from "../../../components/table";
 import { useUsers, useDeleteUser } from "../../../hooks/useUsers";
+import { useHasPermission } from "../../../hooks/useAuth";
+import { Permissions } from "../../../lib/permissions";
 import type { User } from "../../../services/userService";
+import UserAccessModal from "./UserAccessModal";
 
 const columnHelper = createColumnHelper<User>();
 
 function Users() {
   const { data: users = [], isLoading, error } = useUsers();
   const deleteUserMutation = useDeleteUser();
+  const canManage = useHasPermission(Permissions.USERS_MANAGE);
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const handleEdit = useCallback((user: User) => {
-    console.log("Edit user:", user);
-    // TODO: Implement edit functionality with a modal
+  const [accessUser, setAccessUser] = useState<User | null>(null);
+  const [showAccess, setShowAccess] = useState(false);
+
+  const handleManage = useCallback((user: User) => {
+    setAccessUser(user);
+    setShowAccess(true);
   }, []);
 
   const handleDelete = useCallback(
@@ -90,12 +97,14 @@ function Users() {
         header: "Actions",
         cell: (info) => (
           <div className="text-sm font-medium space-x-2">
-            <button
-              onClick={() => handleEdit(info.row.original)}
-              className="text-indigo-600 hover:text-indigo-900"
-            >
-              Edit
-            </button>
+            {canManage && (
+              <button
+                onClick={() => handleManage(info.row.original)}
+                className="text-indigo-600 hover:text-indigo-900"
+              >
+                Manage
+              </button>
+            )}
             <button
               onClick={() => handleDelete(info.row.original.id)}
               className="text-red-600 hover:text-red-900"
@@ -107,7 +116,7 @@ function Users() {
         ),
       }),
     ],
-    [handleEdit, handleDelete, deleteUserMutation.isPending],
+    [canManage, handleManage, handleDelete, deleteUserMutation.isPending],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -167,6 +176,12 @@ function Users() {
         )}
         <Pagination table={table} />
       </div>
+
+      <UserAccessModal
+        user={accessUser}
+        isOpen={showAccess}
+        onClose={() => setShowAccess(false)}
+      />
     </div>
   );
 }

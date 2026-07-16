@@ -21,6 +21,10 @@ export class UserService implements ICrudService<User> {
         return this.userRepo.findAll();
     }
 
+    async findAllWithRelations(): Promise<User[]> {
+        return this.userRepo.findAllWithRelations();
+    }
+
     async findAllPaginated(
         pagination: PaginationParams,
     ): Promise<PaginatedResult<User>> {

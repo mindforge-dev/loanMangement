@@ -22,14 +22,18 @@ export class UserController extends BaseController<User> {
         }
     };
 
-    // Override getAll to strip password hashes
+    // Override getAll to strip password hashes and flatten roles/permissions to name arrays
     getAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const users = await this.service.findAll();
-            const safeUsers = users.map((u) => {
-                const { passwordHash, ...safe } = u;
-                return safe;
-            });
+            const users = await userService.findAllWithRelations();
+            const safeUsers = users.map((u) => ({
+                id: u.id,
+                name: u.name,
+                email: u.email,
+                createdAt: u.createdAt,
+                roles: (u.roles ?? []).map((r) => r.name),
+                permissions: (u.permissions ?? []).map((p) => p.name),
+            }));
             res.json({ data: safeUsers });
         } catch (error) {
             next(error);

@@ -30,6 +30,15 @@ export class UserRepository extends BaseRepository<User> {
             .where('user.id = :id', { id })
             .getOne();
     }
+
+    async findAllWithRelations(): Promise<User[]> {
+        return this.repo
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.roles', 'role')
+            .leftJoinAndSelect('user.permissions', 'permission')
+            .orderBy('user.createdAt', 'DESC')
+            .getMany();
+    }
 }
 
 export const userRepository = new UserRepository();
