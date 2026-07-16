@@ -105,13 +105,15 @@ function Users() {
                 Manage
               </button>
             )}
-            <button
-              onClick={() => handleDelete(info.row.original.id)}
-              className="text-red-600 hover:text-red-900"
-              disabled={deleteUserMutation.isPending}
-            >
-              {deleteUserMutation.isPending ? "Deleting..." : "Delete"}
-            </button>
+            {canManage && (
+              <button
+                onClick={() => handleDelete(info.row.original.id)}
+                className="text-red-600 hover:text-red-900"
+                disabled={deleteUserMutation.isPending}
+              >
+                {deleteUserMutation.isPending ? "Deleting..." : "Delete"}
+              </button>
+            )}
           </div>
         ),
       }),
@@ -145,8 +147,8 @@ function Users() {
         setGlobalFilter={setGlobalFilter}
         title="Users"
         description="Manage your system users"
-        addButtonText="+ Add User"
-        onAddClick={handleAddUser}
+        addButtonText={canManage ? "+ Add User" : undefined}
+        onAddClick={canManage ? handleAddUser : undefined}
       />
 
       <div>

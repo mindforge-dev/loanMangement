@@ -1,4 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
+import { useHasPermission } from "../../../hooks/useAuth";
+import { Permissions } from "../../../lib/permissions";
 import {
   useReactTable,
   getCoreRowModel,
@@ -22,6 +24,11 @@ import Notification from "../../../components/Notification";
 import { useDebounce } from "../../../hooks/useDebounce";
 
 function Loans() {
+  const canCreate = useHasPermission(Permissions.LOANS_CREATE);
+  const canEdit = useHasPermission(Permissions.LOANS_EDIT);
+  const canDelete = useHasPermission(Permissions.LOANS_DELETE);
+  const canUpdateStatus = useHasPermission(Permissions.LOANS_UPDATE_STATUS);
+
   // State for pagination and filters
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -175,21 +182,29 @@ function Loans() {
     setPage(1);
   }, []);
 
-  const columns = useMemo(
-    () =>
-      createLoanColumns(
-        handleEdit,
-        handleDelete,
-        handleStatusChange,
-        deleteLoanMutation.isPending,
-      ),
-    [
+  const columns = useMemo(() => {
+    const cols = createLoanColumns(
       handleEdit,
       handleDelete,
       handleStatusChange,
       deleteLoanMutation.isPending,
-    ],
-  );
+      canEdit,
+      canDelete,
+      canUpdateStatus,
+    );
+    if (!canEdit && !canDelete) {
+      return cols.filter((col) => col.id !== "actions");
+    }
+    return cols;
+  }, [
+    handleEdit,
+    handleDelete,
+    handleStatusChange,
+    deleteLoanMutation.isPending,
+    canEdit,
+    canDelete,
+    canUpdateStatus,
+  ]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -219,8 +234,8 @@ function Loans() {
           setGlobalFilter={setGlobalFilter}
           title="Loans"
           description="Manage loan applications and approvals"
-          addButtonText="+ Add Loan"
-          onAddClick={handleAddLoan}
+          addButtonText={canCreate ? "+ Add Loan" : undefined}
+          onAddClick={canCreate ? handleAddLoan : undefined}
         />
 
         {/* Advanced Filters */}

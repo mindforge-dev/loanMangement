@@ -8,6 +8,8 @@ import {
     syncPermissions,
     getRoles,
     getPermissions,
+    createRole,
+    createPermission,
 } from '../services/userService'
 import type { User, Role, Permission } from '../services/userService'
 
@@ -89,6 +91,38 @@ export const useSyncPermissions = (): UseMutationResult<
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: userKeys.lists() })
             queryClient.invalidateQueries({ queryKey: userKeys.detail(data.id) })
+        },
+    })
+}
+
+// Create a new role
+export const useCreateRole = (): UseMutationResult<
+    Role,
+    Error,
+    { name: string; permissions?: string[] }
+> => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ name, permissions }) => createRole(name, permissions),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: userKeys.roles() })
+        },
+    })
+}
+
+// Create a new permission
+export const useCreatePermission = (): UseMutationResult<
+    Permission,
+    Error,
+    { name: string }
+> => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ name }) => createPermission(name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: userKeys.permissions() })
         },
     })
 }

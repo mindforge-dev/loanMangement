@@ -1,4 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
+import { useHasPermission } from "../../../hooks/useAuth";
+import { Permissions } from "../../../lib/permissions";
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,6 +18,10 @@ import BorrowerFormModal from "./BorrowerFormModal";
 import Notification from "../../../components/Notification";
 
 function Borrowers() {
+  const canCreate = useHasPermission(Permissions.BORROWERS_CREATE);
+  const canEdit = useHasPermission(Permissions.BORROWERS_EDIT);
+  const canDelete = useHasPermission(Permissions.BORROWERS_DELETE);
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -88,15 +94,25 @@ function Borrowers() {
     setPage(1); // Reset to first page when changing limit
   }, []);
 
-  const columns = useMemo(
-    () =>
-      createBorrowerColumns(
-        handleEdit,
-        handleDelete,
-        deleteBorrowerMutation.isPending,
-      ),
-    [handleEdit, handleDelete, deleteBorrowerMutation.isPending],
-  );
+  const columns = useMemo(() => {
+    const cols = createBorrowerColumns(
+      handleEdit,
+      handleDelete,
+      deleteBorrowerMutation.isPending,
+      canEdit,
+      canDelete,
+    );
+    if (!canEdit && !canDelete) {
+      return cols.filter((col) => col.id !== "actions");
+    }
+    return cols;
+  }, [
+    handleEdit,
+    handleDelete,
+    deleteBorrowerMutation.isPending,
+    canEdit,
+    canDelete,
+  ]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -126,8 +142,8 @@ function Borrowers() {
           setGlobalFilter={setGlobalFilter}
           title="Borrowers"
           description="Manage borrower information"
-          addButtonText="+ Add Borrower"
-          onAddClick={handleAddBorrower}
+          addButtonText={canCreate ? "+ Add Borrower" : undefined}
+          onAddClick={canCreate ? handleAddBorrower : undefined}
         />
 
         <div>

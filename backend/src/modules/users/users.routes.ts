@@ -7,6 +7,8 @@ import { ModulePermission } from "../rbac/enums/permissions";
 import {
     ManageUserRolesSchema,
     ManageUserPermissionsSchema,
+    CreateRoleSchema,
+    CreatePermissionSchema,
 } from "./users.validators";
 
 const router = Router();
@@ -22,11 +24,25 @@ router.get(
     checkPermissions(ModulePermission.USERS_VIEW),
     userController.listRoles,
 );
+router.post(
+    "/roles",
+    authenticate,
+    checkPermissions(ModulePermission.USERS_MANAGE),
+    validate(CreateRoleSchema),
+    userController.createRole,
+);
 router.get(
     "/permissions",
     authenticate,
     checkPermissions(ModulePermission.USERS_VIEW),
     userController.listPermissions,
+);
+router.post(
+    "/permissions",
+    authenticate,
+    checkPermissions(ModulePermission.USERS_MANAGE),
+    validate(CreatePermissionSchema),
+    userController.createPermission,
 );
 
 // User management

@@ -16,7 +16,9 @@ const formatDate = (dateString: string) => {
 export const createBorrowerColumns = (
     handleEdit: (borrower: Borrower) => void,
     handleDelete: (id: string) => void,
-    isDeleting: boolean
+    isDeleting: boolean,
+    canEdit: boolean,
+    canDelete: boolean
 ) => [
         columnHelper.accessor('full_name', {
             header: 'Full Name',
@@ -61,22 +63,30 @@ export const createBorrowerColumns = (
         columnHelper.display({
             id: 'actions',
             header: 'Actions',
-            cell: (info) => (
-                <div className="text-sm font-medium space-x-2">
-                    <button
-                        onClick={() => handleEdit(info.row.original)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => handleDelete(info.row.original.id)}
-                        className="text-red-600 hover:text-red-900"
-                        disabled={isDeleting}
-                    >
-                        Delete
-                    </button>
-                </div>
-            ),
+            cell: (info) => {
+                const showActions = canEdit || canDelete
+                if (!showActions) return null
+                return (
+                    <div className="text-sm font-medium space-x-2">
+                        {canEdit && (
+                            <button
+                                onClick={() => handleEdit(info.row.original)}
+                                className="text-indigo-600 hover:text-indigo-900"
+                            >
+                                Edit
+                            </button>
+                        )}
+                        {canDelete && (
+                            <button
+                                onClick={() => handleDelete(info.row.original.id)}
+                                className="text-red-600 hover:text-red-900"
+                                disabled={isDeleting}
+                            >
+                                Delete
+                            </button>
+                        )}
+                    </div>
+                )
+            },
         }),
     ]

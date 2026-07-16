@@ -1,4 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
+import { useHasPermission } from "../../../hooks/useAuth";
+import { Permissions } from "../../../lib/permissions";
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,6 +19,8 @@ import TransactionFormModal from "./TransactionFormModal";
 import Notification from "../../../components/Notification";
 
 function Payments() {
+  const canCreate = useHasPermission(Permissions.TRANSACTIONS_CREATE);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -109,8 +113,8 @@ function Payments() {
           setGlobalFilter={setGlobalFilter}
           title="Transactions"
           description="Track and manage loan transactions"
-          addButtonText="+ Add Transaction"
-          onAddClick={handleAddTransaction}
+          addButtonText={canCreate ? "+ Add Transaction" : undefined}
+          onAddClick={canCreate ? handleAddTransaction : undefined}
         />
 
         <div>

@@ -12,6 +12,7 @@ export interface User {
 export interface Role {
     id: number;
     name: string;
+    permissions?: Permission[];
 }
 
 export interface Permission {
@@ -41,6 +42,18 @@ export const getPermissions = async (): Promise<Permission[]> => {
     const response = await api.get<{ data: Permission[] }>(
         "/dashboard/users/permissions",
     );
+    return response.data.data;
+};
+
+// Create a new role
+export const createRole = async (name: string, permissions?: string[]): Promise<Role> => {
+    const response = await api.post<{ data: Role }>("/dashboard/users/roles", { name, permissions });
+    return response.data.data;
+};
+
+// Create a new permission
+export const createPermission = async (name: string): Promise<Permission> => {
+    const response = await api.post<{ data: Permission }>("/dashboard/users/permissions", { name });
     return response.data.data;
 };
 

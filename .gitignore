@@ -11,3 +11,4 @@ tmp
 AGENTS.md
 .agents/
 skills-lock.json
+*.txt

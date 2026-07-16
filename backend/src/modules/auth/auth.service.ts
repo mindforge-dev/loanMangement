@@ -134,11 +134,44 @@ export class AuthService {
     }
 
     async getAllRoles(): Promise<Role[]> {
-        return this.roleRepo.find({ order: { id: 'ASC' } });
+        return this.roleRepo.find({ relations: ['permissions'], order: { id: 'ASC' } });
     }
 
     async getAllPermissions(): Promise<Permission[]> {
         return this.permissionRepo.find({ order: { id: 'ASC' } });
+    }
+
+    async createRole(name: string, permissionNames?: string[]): Promise<Role> {
+        const existing = await this.roleRepo.findOne({ where: { name } });
+        if (existing) {
+            throw new BadRequestError(`Role "${name}" already exists`);
+        }
+
+        const role = new Role();
+        role.name = name;
+
+        if (permissionNames && permissionNames.length > 0) {
+            const permissions = await this.permissionRepo.find({
+                where: permissionNames.map((name) => ({ name })),
+            });
+            role.permissions = permissions;
+        } else {
+            role.permissions = [];
+        }
+
+        return this.roleRepo.save(role);
+    }
+
+    async createPermission(name: string): Promise<Permission> {
+        const existing = await this.permissionRepo.findOne({ where: { name } });
+        if (existing) {
+            throw new BadRequestError(`Permission "${name}" already exists`);
+        }
+
+        const permission = new Permission();
+        permission.name = name;
+
+        return this.permissionRepo.save(permission);
     }
 
     async assignRoles(userId: string, roleNames: string[]): Promise<UserWithPermissions | null> {

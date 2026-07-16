@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-    useRoles,
-    usePermissions,
-    useAssignRoles,
-    useSyncPermissions,
-} from "../../../hooks/useUsers";
-import type { User } from "../../../services/userService";
+import { useState, useMemo } from "react";
+import { usePermissions, useCreateRole } from "../../../hooks/useUsers";
 
-interface UserAccessModalProps {
-    user: User | null;
+interface CreateRoleModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
@@ -21,29 +14,17 @@ function titleCase(mod: string): string {
         .join(" ");
 }
 
-export default function UserAccessModal({
-    user,
+export default function CreateRoleModal({
     isOpen,
     onClose,
     onSuccess,
-}: UserAccessModalProps) {
-    const { data: roles = [] } = useRoles();
+}: CreateRoleModalProps) {
     const { data: permissions = [] } = usePermissions();
-    const assignRolesMutation = useAssignRoles();
-    const syncPermissionsMutation = useSyncPermissions();
+    const createRoleMutation = useCreateRole();
 
-    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [name, setName] = useState("");
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
     const [submitError, setSubmitError] = useState<string | null>(null);
-
-    // Reset selections whenever the target user changes
-    useEffect(() => {
-        if (user) {
-            setSelectedRoles(user.roles ?? []);
-            setSelectedPermissions(user.permissions ?? []);
-            setSubmitError(null);
-        }
-    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Group permissions by module prefix (e.g. "users:view" -> "users")
     const groupedPermissions = useMemo(() => {
@@ -56,45 +37,36 @@ export default function UserAccessModal({
         return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     }, [permissions]);
 
-    const toggleRole = (name: string) =>
-        setSelectedRoles((prev) =>
-            prev.includes(name) ? prev.filter((r) => r !== name) : [...prev, name],
-        );
-
-    const togglePermission = (name: string) =>
+    const togglePermission = (permName: string) =>
         setSelectedPermissions((prev) =>
-            prev.includes(name)
-                ? prev.filter((p) => p !== name)
-                : [...prev, name],
+            prev.includes(permName)
+                ? prev.filter((p) => p !== permName)
+                : [...prev, permName],
         );
-
-    const isSaving =
-        assignRolesMutation.isPending || syncPermissionsMutation.isPending;
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) return;
+        if (!name.trim()) {
+            setSubmitError("Role name is required");
+            return;
+        }
         setSubmitError(null);
         try {
-            await assignRolesMutation.mutateAsync({
-                id: user.id,
-                roles: selectedRoles,
-            });
-            await syncPermissionsMutation.mutateAsync({
-                id: user.id,
+            await createRoleMutation.mutateAsync({
+                name: name.trim().toLowerCase(),
                 permissions: selectedPermissions,
             });
+            setName("");
+            setSelectedPermissions([]);
             onSuccess?.();
             onClose();
-        } catch (err) {
-            console.error("Failed to update user access:", err);
-            setSubmitError(
-                "Failed to update access. Check that you have the users:manage permission.",
-            );
+        } catch (err: any) {
+            console.error("Failed to create role:", err);
+            setSubmitError(err?.response?.data?.error?.message || "Failed to create role.");
         }
     };
 
-    if (!isOpen || !user) return null;
+    if (!isOpen) return null;
 
     const Chip = ({
         label,
@@ -135,20 +107,16 @@ export default function UserAccessModal({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                                    Manage Access
+                                    Create New Role
                                 </h2>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Assign roles &amp; permissions for{" "}
-                                    <span className="font-semibold text-gray-700">
-                                        {user.name}
-                                    </span>{" "}
-                                    ({user.email})
+                                    Define a new role and associate initial permissions.
                                 </p>
                             </div>
                             <button
                                 onClick={onClose}
                                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                                disabled={isSaving}
+                                disabled={createRoleMutation.isPending}
                             >
                                 <svg
                                     className="w-6 h-6 text-gray-400"
@@ -168,41 +136,29 @@ export default function UserAccessModal({
                     </div>
 
                     <form onSubmit={handleSave} className="px-8 py-6 space-y-8">
-                        {/* Roles */}
+                        {/* Name Input */}
                         <div>
-                            <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                                Roles
-                            </h3>
-                            <p className="text-xs text-gray-400 mb-3">
-                                Roles grant a bundle of permissions. The{" "}
-                                <span className="font-medium">super-admin</span>{" "}
-                                role bypasses all permission checks.
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                {roles.length === 0 && (
-                                    <p className="text-sm text-gray-400">
-                                        No roles available.
-                                    </p>
-                                )}
-                                {roles.map((role) => (
-                                    <Chip
-                                        key={role.id}
-                                        label={role.name}
-                                        active={selectedRoles.includes(role.name)}
-                                        onClick={() => toggleRole(role.name)}
-                                    />
-                                ))}
-                            </div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Role Name
+                            </label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. manager, accountant"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900"
+                                disabled={createRoleMutation.isPending}
+                                required
+                            />
                         </div>
 
-                        {/* Direct permissions */}
+                        {/* Permissions selection */}
                         <div>
                             <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                                Direct Permissions
+                                Assign Permissions
                             </h3>
                             <p className="text-xs text-gray-400 mb-3">
-                                Extra permissions granted directly to this user
-                                (in addition to those from roles).
+                                Select the permissions that this role should grant.
                             </p>
                             <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
                                 {groupedPermissions.map(([mod, perms]) => (
@@ -211,18 +167,14 @@ export default function UserAccessModal({
                                             {titleCase(mod)}
                                         </p>
                                         <div className="flex flex-wrap gap-2">
-                                            {perms.map((name) => {
-                                                const action = name.split(":")[1];
+                                            {perms.map((pName) => {
+                                                const action = pName.split(":")[1];
                                                 return (
                                                     <Chip
-                                                        key={name}
+                                                        key={pName}
                                                         label={action}
-                                                        active={selectedPermissions.includes(
-                                                            name,
-                                                        )}
-                                                        onClick={() =>
-                                                            togglePermission(name)
-                                                        }
+                                                        active={selectedPermissions.includes(pName)}
+                                                        onClick={() => togglePermission(pName)}
                                                     />
                                                 );
                                             })}
@@ -243,43 +195,17 @@ export default function UserAccessModal({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                disabled={isSaving}
+                                disabled={createRoleMutation.isPending}
                                 className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                disabled={isSaving}
+                                disabled={createRoleMutation.isPending}
                                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
-                                {isSaving ? (
-                                    <>
-                                        <svg
-                                            className="animate-spin h-5 w-5"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                            ></circle>
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            ></path>
-                                        </svg>
-                                        Saving...
-                                    </>
-                                ) : (
-                                    "Save Changes"
-                                )}
+                                {createRoleMutation.isPending ? "Creating..." : "Create Role"}
                             </button>
                         </div>
                     </form>

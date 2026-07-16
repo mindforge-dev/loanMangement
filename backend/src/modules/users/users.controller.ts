@@ -72,6 +72,26 @@ export class UserController extends BaseController<User> {
         }
     };
 
+    createRole = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { name, permissions } = req.body;
+            const role = await authService.createRole(name, permissions);
+            res.status(201).json({ data: role });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    createPermission = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { name } = req.body;
+            const permission = await authService.createPermission(name);
+            res.status(201).json({ data: permission });
+        } catch (error) {
+            next(error);
+        }
+    };
+
     assignRoles = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
